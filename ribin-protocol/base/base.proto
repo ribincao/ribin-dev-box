@@ -1,0 +1,42 @@
+syntax = "proto3";
+option go_package = "ribin-protocol/base";
+
+message Test
+{
+  string seq						= 1;
+  bytes body						= 2;
+};
+// Request
+enum MsgType
+{
+  E_MSGTYPE_INVALID = 0;
+  E_MSGTYPE_CHAT = 1;
+}
+message ReqBody
+{
+  string uid = 1;
+}
+
+
+enum Client2ServerReqCmd
+{
+  E_CMD_INVALID = 0;
+  E_CMD_HEART_BEAT = 10;
+}
+
+message Client2ServerReq
+{
+  Client2ServerReqCmd cmd = 1;
+  string seq = 2;
+}
+message Server2ClientRsp
+{
+  string seq = 1;
+  Client2ServerReqCmd cmd = 2; 
+  int32 code = 3;
+  string msg = 4;
+}
+
+// protoc --go_out=plugins=grpc:. --go_opt=paths=source_relative ./base/base.proto
+// C#:
+// protoc --csharp_out=./base/ ./base/base.proto
