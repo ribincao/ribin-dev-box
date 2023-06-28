@@ -11,14 +11,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func initLocalEnv() {
+func InitLocalRedisTestEnv() {
 	config.InitConfig("./conf.yaml")
 	logger.InitLogger(config.GlobalConfig.LogConfig)
 	db.InitRedis()
 }
-
 func TestRedisString(t *testing.T) {
-	initLocalEnv()
+	InitLocalRedisTestEnv()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
 	defer cancel()
 	err := db.RedisGlobal.Set(ctx, "ping", "pong", time.Second*120)

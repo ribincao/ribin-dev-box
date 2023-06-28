@@ -9,9 +9,13 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestLogger(t *testing.T) {
+func InitLocalLoggerTestEnv() {
 	config.InitConfig("./conf.yaml")
 	logger.InitLogger(config.GlobalConfig.LogConfig)
+}
+
+func TestLogger(t *testing.T) {
+	InitLocalLoggerTestEnv()
 	logger.Debug("DebugTest :", zap.String("Env", config.GlobalConfig.ServiceConfig.Env))
 	logger.Info("InfoTest :", zap.String("Env", config.GlobalConfig.ServiceConfig.Env))
 	logger.Error("ErrorTest :", zap.String("Env", config.GlobalConfig.ServiceConfig.Env))
