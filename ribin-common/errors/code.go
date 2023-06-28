@@ -9,3 +9,6 @@ const (
 const (
 	ConnectionCloseErrorCode = 20001
 )
+const (
+	MessageDecodeErrorCode = 30001
+)
