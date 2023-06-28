@@ -12,3 +12,15 @@ const (
 const (
 	MessageDecodeErrorCode = 30001
 )
+const (
+	RoomUnexistErrorCode     = -10001
+	PlayerNotInRoomErrorCode = -10002
+	ParamsErrorCode          = -10003
+)
+
+var (
+	PlayerNotInRoomError = New(PlayerNotInRoomErrorCode, "player not in room")
+	RoomUnexistError     = New(RoomUnexistErrorCode, "room unexist")
+	RoomIdParamError     = New(ParamsErrorCode, "roomid empty")
+	PlayerIdParamError   = New(ParamsErrorCode, "playerid empty")
+)

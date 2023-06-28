@@ -98,7 +98,7 @@ func (s *RoomServer) OnMessage(c *network.WrapConnection, packet *network.Messag
 	}
 	data, err := s.handleFrame(c, frame)
 	if err != nil && err.Error() != "" {
-		if e, ok := err.(*errs.Error); ok {
+		if e, ok := err.(*errs.Error); ok && e.Code != errs.RoomUnexistErrorCode && e.Code != errs.PlayerNotInRoomErrorCode {
 			logger.Error("handleFrame error", zap.Error(e))
 		}
 	}
