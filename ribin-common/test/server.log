@@ -6,3 +6,19 @@
 {"level_name":"[INFO]","time":"2023-06-28 14:44:26.065","caller_line":"[db/redis.go:32]","msg":"[Engine-Tool] Redis Client Initialized!"}
 {"level_name":"[INFO]","time":"2023-06-28 14:44:26.104","caller_line":"[test/redis_test.go:21]","msg":"TestSet","value":"OK","err":null}
 {"level_name":"[INFO]","time":"2023-06-28 14:44:26.106","caller_line":"[test/redis_test.go:23]","msg":"TestSet","value":"pong","err":null}
+{"level_name":"[INFO]","time":"2023-06-28 15:19:03.180","caller_line":"[db/redis.go:42]","msg":"[Engine-Tool] Redis Client Initialized!"}
+{"level_name":"[INFO]","time":"2023-06-28 15:19:03.248","caller_line":"[test/redis_test.go:25]","msg":"TestSet","err":null}
+{"level_name":"[INFO]","time":"2023-06-28 15:19:03.250","caller_line":"[test/redis_test.go:27]","msg":"TestSet","value":"pong","err":null}
+{"level_name":"[DEBUG]","time":"2023-06-28 15:19:08.299","caller_line":"[test/logger_test.go:15]","msg":"DebugTest :","Env":"local"}
+{"level_name":"[INFO]","time":"2023-06-28 15:19:08.301","caller_line":"[test/logger_test.go:16]","msg":"InfoTest :","Env":"local"}
+{"level_name":"[ERROR]","time":"2023-06-28 15:19:08.301","caller_line":"[test/logger_test.go:17]","msg":"ErrorTest :","Env":"local"}
+{"level_name":"[WARN]","time":"2023-06-28 15:19:08.301","caller_line":"[test/logger_test.go:18]","msg":"WarnTest :","Env":"local"}
+{"level_name":"[FATAL]","time":"2023-06-28 15:19:08.301","caller_line":"[test/logger_test.go:19]","msg":"FatalTest :","Env":"local"}
+{"level_name":"[DEBUG]","time":"2023-06-28 15:19:59.888","caller_line":"[test/logger_test.go:15]","msg":"DebugTest :","Env":"local"}
+{"level_name":"[INFO]","time":"2023-06-28 15:19:59.888","caller_line":"[test/logger_test.go:16]","msg":"InfoTest :","Env":"local"}
+{"level_name":"[ERROR]","time":"2023-06-28 15:19:59.888","caller_line":"[test/logger_test.go:17]","msg":"ErrorTest :","Env":"local"}
+{"level_name":"[WARN]","time":"2023-06-28 15:19:59.888","caller_line":"[test/logger_test.go:18]","msg":"WarnTest :","Env":"local"}
+{"level_name":"[FATAL]","time":"2023-06-28 15:19:59.888","caller_line":"[test/logger_test.go:19]","msg":"FatalTest :","Env":"local"}
+{"level_name":"[INFO]","time":"2023-06-28 15:20:11.315","caller_line":"[db/redis.go:42]","msg":"[Engine-Tool] Redis Client Initialized!"}
+{"level_name":"[INFO]","time":"2023-06-28 15:20:11.348","caller_line":"[test/redis_test.go:25]","msg":"TestSet","err":null}
+{"level_name":"[INFO]","time":"2023-06-28 15:20:11.351","caller_line":"[test/redis_test.go:27]","msg":"TestSet","value":"pong","err":null}

@@ -1,7 +1,9 @@
 package test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/ribincao/ribin-dev-box/ribin-common/config"
 	"github.com/ribincao/ribin-dev-box/ribin-common/db"
@@ -15,10 +17,12 @@ func initLocalEnv() {
 	db.InitRedis()
 }
 
-func TestRedisSetAndGet(t *testing.T) {
+func TestRedisString(t *testing.T) {
 	initLocalEnv()
-	val, err := db.RedisGlobal.TestSet()
-	logger.Info("TestSet", zap.Any("value", val), zap.Any("err", err))
-	val, err = db.RedisGlobal.TestGet()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*1)
+	defer cancel()
+	err := db.RedisGlobal.Set(ctx, "ping", "pong", time.Second*120)
+	logger.Info("TestSet", zap.Any("err", err))
+	val, err := db.RedisGlobal.Get(ctx, "ping")
 	logger.Info("TestSet", zap.Any("value", val), zap.Any("err", err))
 }

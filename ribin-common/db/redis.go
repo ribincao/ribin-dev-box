@@ -1,42 +1,93 @@
 package db
 
 import (
-	"sync"
+	"crypto/tls"
 	"time"
 
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v8"
+	"github.com/go-redsync/redsync/v4"
+	"github.com/go-redsync/redsync/v4/redis/goredis/v8"
 	"github.com/ribincao/ribin-dev-box/ribin-common/config"
+	"github.com/ribincao/ribin-dev-box/ribin-common/constant"
 	"github.com/ribincao/ribin-dev-box/ribin-common/logger"
 )
 
 var (
-	openRedisDB sync.Once
-	RedisGlobal *RedisClient
+	RedisGlobal IRedis
 )
 
-type RedisClient struct {
-	Client *redis.Client
-}
+type ClientType int32
+type ClusterOptions func(*redis.ClusterOptions)
 
-type RedisCluster struct {
-	Client *redis.ClusterClient
-}
+const (
+	T_Client  ClientType = 1
+	T_Cluster ClientType = 2
+	NilError             = redis.Nil
+)
 
 func InitRedis() {
-	RedisGlobal = &RedisClient{}
-	RedisGlobal.Client = redis.NewClient(&redis.Options{
-		Addr:     config.GlobalConfig.ServiceConfig.RedisAddr,
-		Password: config.GlobalConfig.ServiceConfig.RedisPasswd,
-		DB:       0,
-	})
+	if config.GlobalConfig.ServiceConfig.Env == constant.ENV_LOCAL {
+		RedisGlobal = NewRedisClient(
+			config.GlobalConfig.ServiceConfig.RedisAddr,
+			config.GlobalConfig.ServiceConfig.RedisUserName,
+			config.GlobalConfig.ServiceConfig.RedisPasswd,
+			T_Client)
+	} else {
+		RedisGlobal = NewRedisClient(
+			config.GlobalConfig.ServiceConfig.RedisAddr,
+			config.GlobalConfig.ServiceConfig.RedisUserName,
+			config.GlobalConfig.ServiceConfig.RedisPasswd,
+			T_Cluster)
+	}
 	logger.Info("[Engine-Tool] Redis Client Initialized!")
 }
 
-func (client *RedisClient) TestGet() (string, error) {
-	val, err := client.Client.Get("ping").Result()
-	return val, err
+func NewRedisClient(addr, userName, userPwd string, clientType ClientType) IRedis {
+	if clientType == T_Client {
+		c := &RedisClient{}
+		c.Client = redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Username: userName,
+			Password: userPwd,
+		})
+		return c
+	}
+	cc := createClusterClient(addr, userName, userPwd)
+	rs := redsync.New(goredis.NewPool(cc))
+	return &RedisCluster{Client: cc, address: addr, rs: rs}
 }
-func (client *RedisClient) TestSet() (string, error) {
-	val, err := client.Client.Set("ping", "pong", time.Second*120).Result()
-	return val, err
+
+func createClusterClient(addr, username, password string, cusClusterOptions ...ClusterOptions) *redis.ClusterClient {
+	opts := &redis.ClusterOptions{
+		Addrs:          []string{addr},
+		Password:       password,
+		Username:       username,
+		MaxRedirects:   3,
+		ReadOnly:       false,
+		RouteByLatency: false,
+
+		MaxRetries:      0,
+		MinRetryBackoff: 8 * time.Millisecond,
+		MaxRetryBackoff: 512 * time.Millisecond,
+
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolTimeout:  4 * time.Second,
+
+		PoolSize:     15,
+		MinIdleConns: 1,
+
+		IdleCheckFrequency: 60 * time.Second,
+		IdleTimeout:        5 * time.Minute,
+		MaxConnAge:         0 * time.Second,
+
+		TLSConfig: &tls.Config{},
+	}
+
+	for _, cusOpt := range cusClusterOptions {
+		cusOpt(opts)
+	}
+
+	return redis.NewClusterClient(opts)
 }
