@@ -6,6 +6,7 @@ require (
 	agones.dev/agones v1.32.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.8.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.53.0

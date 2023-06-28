@@ -6,3 +6,6 @@ const (
 	TimerTaskRepeatErrorCode = 10003
 	TimerTaskAddErrorCode    = 10004
 )
+const (
+	ConnectionCloseErrorCode = 20001
+)
