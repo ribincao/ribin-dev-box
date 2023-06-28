@@ -1,3 +1,4 @@
+
 syntax = "proto3";
 option go_package = "ribin-protocol/base";
 
@@ -14,27 +15,123 @@ enum MsgType
 }
 message ReqBody
 {
-  string uid = 1;
+  string roomId = 1;
+  string playerId = 2;
+  EnterRoomReq enterRoomReq = 3;
+  LeaveRoomReq leaveRoomReq = 4;
+  RoomMessageReq roomMessageReq = 5;
+  Frame sendframeReq = 6;
 }
 
+message Position
+{
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message Frame
+{
+  string playerId = 1;
+  Position position = 2;
+}
+
+message EnterRoomReq
+{}
+
+message LeaveRoomReq
+{}
+
+message RoomMessageReq
+{
+  MsgType msgType = 1;
+}
 
 enum Client2ServerReqCmd
 {
   E_CMD_INVALID = 0;
   E_CMD_HEART_BEAT = 10;
+
+  E_CMD_ROOM_ENTER = 2000;
+  E_CMD_ROOM_LEAVE = 2001;
+  E_CMD_ROOM_MESSAGE = 2002;
+  E_CMD_ROOM_FRAME = 2003;
 }
 
 message Client2ServerReq
 {
   Client2ServerReqCmd cmd = 1;
   string seq = 2;
+  ReqBody body = 3;
 }
+
+// Response
+message RoomInfo
+{
+  string roomId = 1;
+  int32 maxPlayerCount = 2;
+  int32 currentPlayerCount = 3;
+}
+
+message EnterRoomRsp
+{
+  RoomInfo roomInfo = 1;
+}
+
+message LeaveRoomRsp
+{}
+
+message RoomMessageRsp
+{
+  MsgType msgType = 1;
+}
+
+message RspBody
+{
+  string roomId = 1;
+  string playerId = 2;
+  EnterRoomRsp  enterRoomRsp = 3;
+  LeaveRoomRsp leaveRoomRsp = 4;
+  RoomMessageRsp roomMessageRsp = 5;
+}
+
 message Server2ClientRsp
 {
   string seq = 1;
   Client2ServerReqCmd cmd = 2; 
   int32 code = 3;
   string msg = 4;
+  RspBody body = 5;
+}
+
+
+// Broadcast
+message Frames
+{
+  repeated Frame frames = 1;
+}
+
+message BstBody
+{
+  string fromPlayerId = 1;
+  Frames frames = 2;
+}
+
+enum Server2ClientBstType
+{
+  E_PUSH_TEST = 0;
+
+  E_PUSH_ROOM_ENTER = 200;
+  E_PUSH_ROOM_LEAVE = 201;
+  E_PUSH_ROOM_MESSAGE = 202;
+  E_PUSH_ROOM_CONNECT = 203;
+  E_PUSH_ROOM_FRAMES = 204;
+}
+message Server2ClientBst
+{
+  Server2ClientBstType type = 1;
+  string seq = 2;
+  BstBody body = 3;
 }
 
 // protoc --go_out=plugins=grpc:. --go_opt=paths=source_relative ./base/base.proto

@@ -70,19 +70,31 @@ func (MsgType) EnumDescriptor() ([]byte, []int) {
 type Client2ServerReqCmd int32
 
 const (
-	Client2ServerReqCmd_E_CMD_INVALID    Client2ServerReqCmd = 0
-	Client2ServerReqCmd_E_CMD_HEART_BEAT Client2ServerReqCmd = 10
+	Client2ServerReqCmd_E_CMD_INVALID      Client2ServerReqCmd = 0
+	Client2ServerReqCmd_E_CMD_HEART_BEAT   Client2ServerReqCmd = 10
+	Client2ServerReqCmd_E_CMD_ROOM_ENTER   Client2ServerReqCmd = 2000
+	Client2ServerReqCmd_E_CMD_ROOM_LEAVE   Client2ServerReqCmd = 2001
+	Client2ServerReqCmd_E_CMD_ROOM_MESSAGE Client2ServerReqCmd = 2002
+	Client2ServerReqCmd_E_CMD_ROOM_FRAME   Client2ServerReqCmd = 2003
 )
 
 // Enum value maps for Client2ServerReqCmd.
 var (
 	Client2ServerReqCmd_name = map[int32]string{
-		0:  "E_CMD_INVALID",
-		10: "E_CMD_HEART_BEAT",
+		0:    "E_CMD_INVALID",
+		10:   "E_CMD_HEART_BEAT",
+		2000: "E_CMD_ROOM_ENTER",
+		2001: "E_CMD_ROOM_LEAVE",
+		2002: "E_CMD_ROOM_MESSAGE",
+		2003: "E_CMD_ROOM_FRAME",
 	}
 	Client2ServerReqCmd_value = map[string]int32{
-		"E_CMD_INVALID":    0,
-		"E_CMD_HEART_BEAT": 10,
+		"E_CMD_INVALID":      0,
+		"E_CMD_HEART_BEAT":   10,
+		"E_CMD_ROOM_ENTER":   2000,
+		"E_CMD_ROOM_LEAVE":   2001,
+		"E_CMD_ROOM_MESSAGE": 2002,
+		"E_CMD_ROOM_FRAME":   2003,
 	}
 )
 
@@ -111,6 +123,64 @@ func (x Client2ServerReqCmd) Number() protoreflect.EnumNumber {
 // Deprecated: Use Client2ServerReqCmd.Descriptor instead.
 func (Client2ServerReqCmd) EnumDescriptor() ([]byte, []int) {
 	return file_base_base_proto_rawDescGZIP(), []int{1}
+}
+
+type Server2ClientBstType int32
+
+const (
+	Server2ClientBstType_E_PUSH_TEST         Server2ClientBstType = 0
+	Server2ClientBstType_E_PUSH_ROOM_ENTER   Server2ClientBstType = 200
+	Server2ClientBstType_E_PUSH_ROOM_LEAVE   Server2ClientBstType = 201
+	Server2ClientBstType_E_PUSH_ROOM_MESSAGE Server2ClientBstType = 202
+	Server2ClientBstType_E_PUSH_ROOM_CONNECT Server2ClientBstType = 203
+	Server2ClientBstType_E_PUSH_ROOM_FRAMES  Server2ClientBstType = 204
+)
+
+// Enum value maps for Server2ClientBstType.
+var (
+	Server2ClientBstType_name = map[int32]string{
+		0:   "E_PUSH_TEST",
+		200: "E_PUSH_ROOM_ENTER",
+		201: "E_PUSH_ROOM_LEAVE",
+		202: "E_PUSH_ROOM_MESSAGE",
+		203: "E_PUSH_ROOM_CONNECT",
+		204: "E_PUSH_ROOM_FRAMES",
+	}
+	Server2ClientBstType_value = map[string]int32{
+		"E_PUSH_TEST":         0,
+		"E_PUSH_ROOM_ENTER":   200,
+		"E_PUSH_ROOM_LEAVE":   201,
+		"E_PUSH_ROOM_MESSAGE": 202,
+		"E_PUSH_ROOM_CONNECT": 203,
+		"E_PUSH_ROOM_FRAMES":  204,
+	}
+)
+
+func (x Server2ClientBstType) Enum() *Server2ClientBstType {
+	p := new(Server2ClientBstType)
+	*p = x
+	return p
+}
+
+func (x Server2ClientBstType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (Server2ClientBstType) Descriptor() protoreflect.EnumDescriptor {
+	return file_base_base_proto_enumTypes[2].Descriptor()
+}
+
+func (Server2ClientBstType) Type() protoreflect.EnumType {
+	return &file_base_base_proto_enumTypes[2]
+}
+
+func (x Server2ClientBstType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use Server2ClientBstType.Descriptor instead.
+func (Server2ClientBstType) EnumDescriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{2}
 }
 
 type Test struct {
@@ -173,7 +243,12 @@ type ReqBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Uid string `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	RoomId         string          `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	PlayerId       string          `protobuf:"bytes,2,opt,name=playerId,proto3" json:"playerId,omitempty"`
+	EnterRoomReq   *EnterRoomReq   `protobuf:"bytes,3,opt,name=enterRoomReq,proto3" json:"enterRoomReq,omitempty"`
+	LeaveRoomReq   *LeaveRoomReq   `protobuf:"bytes,4,opt,name=leaveRoomReq,proto3" json:"leaveRoomReq,omitempty"`
+	RoomMessageReq *RoomMessageReq `protobuf:"bytes,5,opt,name=roomMessageReq,proto3" json:"roomMessageReq,omitempty"`
+	SendframeReq   *Frame          `protobuf:"bytes,6,opt,name=sendframeReq,proto3" json:"sendframeReq,omitempty"`
 }
 
 func (x *ReqBody) Reset() {
@@ -208,11 +283,287 @@ func (*ReqBody) Descriptor() ([]byte, []int) {
 	return file_base_base_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ReqBody) GetUid() string {
+func (x *ReqBody) GetRoomId() string {
 	if x != nil {
-		return x.Uid
+		return x.RoomId
 	}
 	return ""
+}
+
+func (x *ReqBody) GetPlayerId() string {
+	if x != nil {
+		return x.PlayerId
+	}
+	return ""
+}
+
+func (x *ReqBody) GetEnterRoomReq() *EnterRoomReq {
+	if x != nil {
+		return x.EnterRoomReq
+	}
+	return nil
+}
+
+func (x *ReqBody) GetLeaveRoomReq() *LeaveRoomReq {
+	if x != nil {
+		return x.LeaveRoomReq
+	}
+	return nil
+}
+
+func (x *ReqBody) GetRoomMessageReq() *RoomMessageReq {
+	if x != nil {
+		return x.RoomMessageReq
+	}
+	return nil
+}
+
+func (x *ReqBody) GetSendframeReq() *Frame {
+	if x != nil {
+		return x.SendframeReq
+	}
+	return nil
+}
+
+type Position struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	X float32 `protobuf:"fixed32,1,opt,name=x,proto3" json:"x,omitempty"`
+	Y float32 `protobuf:"fixed32,2,opt,name=y,proto3" json:"y,omitempty"`
+	Z float32 `protobuf:"fixed32,3,opt,name=z,proto3" json:"z,omitempty"`
+}
+
+func (x *Position) Reset() {
+	*x = Position{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Position) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Position) ProtoMessage() {}
+
+func (x *Position) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Position.ProtoReflect.Descriptor instead.
+func (*Position) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Position) GetX() float32 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *Position) GetY() float32 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+func (x *Position) GetZ() float32 {
+	if x != nil {
+		return x.Z
+	}
+	return 0
+}
+
+type Frame struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PlayerId string    `protobuf:"bytes,1,opt,name=playerId,proto3" json:"playerId,omitempty"`
+	Position *Position `protobuf:"bytes,2,opt,name=position,proto3" json:"position,omitempty"`
+}
+
+func (x *Frame) Reset() {
+	*x = Frame{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Frame) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Frame) ProtoMessage() {}
+
+func (x *Frame) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Frame.ProtoReflect.Descriptor instead.
+func (*Frame) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Frame) GetPlayerId() string {
+	if x != nil {
+		return x.PlayerId
+	}
+	return ""
+}
+
+func (x *Frame) GetPosition() *Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
+type EnterRoomReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *EnterRoomReq) Reset() {
+	*x = EnterRoomReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EnterRoomReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterRoomReq) ProtoMessage() {}
+
+func (x *EnterRoomReq) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterRoomReq.ProtoReflect.Descriptor instead.
+func (*EnterRoomReq) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{4}
+}
+
+type LeaveRoomReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *LeaveRoomReq) Reset() {
+	*x = LeaveRoomReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LeaveRoomReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveRoomReq) ProtoMessage() {}
+
+func (x *LeaveRoomReq) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveRoomReq.ProtoReflect.Descriptor instead.
+func (*LeaveRoomReq) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{5}
+}
+
+type RoomMessageReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MsgType MsgType `protobuf:"varint,1,opt,name=msgType,proto3,enum=MsgType" json:"msgType,omitempty"`
+}
+
+func (x *RoomMessageReq) Reset() {
+	*x = RoomMessageReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoomMessageReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoomMessageReq) ProtoMessage() {}
+
+func (x *RoomMessageReq) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoomMessageReq.ProtoReflect.Descriptor instead.
+func (*RoomMessageReq) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *RoomMessageReq) GetMsgType() MsgType {
+	if x != nil {
+		return x.MsgType
+	}
+	return MsgType_E_MSGTYPE_INVALID
 }
 
 type Client2ServerReq struct {
@@ -220,14 +571,15 @@ type Client2ServerReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Cmd Client2ServerReqCmd `protobuf:"varint,1,opt,name=cmd,proto3,enum=Client2ServerReqCmd" json:"cmd,omitempty"`
-	Seq string              `protobuf:"bytes,2,opt,name=seq,proto3" json:"seq,omitempty"`
+	Cmd  Client2ServerReqCmd `protobuf:"varint,1,opt,name=cmd,proto3,enum=Client2ServerReqCmd" json:"cmd,omitempty"`
+	Seq  string              `protobuf:"bytes,2,opt,name=seq,proto3" json:"seq,omitempty"`
+	Body *ReqBody            `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
 }
 
 func (x *Client2ServerReq) Reset() {
 	*x = Client2ServerReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_base_base_proto_msgTypes[2]
+		mi := &file_base_base_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -240,7 +592,7 @@ func (x *Client2ServerReq) String() string {
 func (*Client2ServerReq) ProtoMessage() {}
 
 func (x *Client2ServerReq) ProtoReflect() protoreflect.Message {
-	mi := &file_base_base_proto_msgTypes[2]
+	mi := &file_base_base_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -253,7 +605,7 @@ func (x *Client2ServerReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Client2ServerReq.ProtoReflect.Descriptor instead.
 func (*Client2ServerReq) Descriptor() ([]byte, []int) {
-	return file_base_base_proto_rawDescGZIP(), []int{2}
+	return file_base_base_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Client2ServerReq) GetCmd() Client2ServerReqCmd {
@@ -270,6 +622,288 @@ func (x *Client2ServerReq) GetSeq() string {
 	return ""
 }
 
+func (x *Client2ServerReq) GetBody() *ReqBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+// Response
+type RoomInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomId             string `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	MaxPlayerCount     int32  `protobuf:"varint,2,opt,name=maxPlayerCount,proto3" json:"maxPlayerCount,omitempty"`
+	CurrentPlayerCount int32  `protobuf:"varint,3,opt,name=currentPlayerCount,proto3" json:"currentPlayerCount,omitempty"`
+}
+
+func (x *RoomInfo) Reset() {
+	*x = RoomInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoomInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoomInfo) ProtoMessage() {}
+
+func (x *RoomInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoomInfo.ProtoReflect.Descriptor instead.
+func (*RoomInfo) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RoomInfo) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *RoomInfo) GetMaxPlayerCount() int32 {
+	if x != nil {
+		return x.MaxPlayerCount
+	}
+	return 0
+}
+
+func (x *RoomInfo) GetCurrentPlayerCount() int32 {
+	if x != nil {
+		return x.CurrentPlayerCount
+	}
+	return 0
+}
+
+type EnterRoomRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomInfo *RoomInfo `protobuf:"bytes,1,opt,name=roomInfo,proto3" json:"roomInfo,omitempty"`
+}
+
+func (x *EnterRoomRsp) Reset() {
+	*x = EnterRoomRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *EnterRoomRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterRoomRsp) ProtoMessage() {}
+
+func (x *EnterRoomRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterRoomRsp.ProtoReflect.Descriptor instead.
+func (*EnterRoomRsp) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *EnterRoomRsp) GetRoomInfo() *RoomInfo {
+	if x != nil {
+		return x.RoomInfo
+	}
+	return nil
+}
+
+type LeaveRoomRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *LeaveRoomRsp) Reset() {
+	*x = LeaveRoomRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LeaveRoomRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveRoomRsp) ProtoMessage() {}
+
+func (x *LeaveRoomRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveRoomRsp.ProtoReflect.Descriptor instead.
+func (*LeaveRoomRsp) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{10}
+}
+
+type RoomMessageRsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MsgType MsgType `protobuf:"varint,1,opt,name=msgType,proto3,enum=MsgType" json:"msgType,omitempty"`
+}
+
+func (x *RoomMessageRsp) Reset() {
+	*x = RoomMessageRsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoomMessageRsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoomMessageRsp) ProtoMessage() {}
+
+func (x *RoomMessageRsp) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoomMessageRsp.ProtoReflect.Descriptor instead.
+func (*RoomMessageRsp) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *RoomMessageRsp) GetMsgType() MsgType {
+	if x != nil {
+		return x.MsgType
+	}
+	return MsgType_E_MSGTYPE_INVALID
+}
+
+type RspBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoomId         string          `protobuf:"bytes,1,opt,name=roomId,proto3" json:"roomId,omitempty"`
+	PlayerId       string          `protobuf:"bytes,2,opt,name=playerId,proto3" json:"playerId,omitempty"`
+	EnterRoomRsp   *EnterRoomRsp   `protobuf:"bytes,3,opt,name=enterRoomRsp,proto3" json:"enterRoomRsp,omitempty"`
+	LeaveRoomRsp   *LeaveRoomRsp   `protobuf:"bytes,4,opt,name=leaveRoomRsp,proto3" json:"leaveRoomRsp,omitempty"`
+	RoomMessageRsp *RoomMessageRsp `protobuf:"bytes,5,opt,name=roomMessageRsp,proto3" json:"roomMessageRsp,omitempty"`
+}
+
+func (x *RspBody) Reset() {
+	*x = RspBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RspBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RspBody) ProtoMessage() {}
+
+func (x *RspBody) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RspBody.ProtoReflect.Descriptor instead.
+func (*RspBody) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *RspBody) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *RspBody) GetPlayerId() string {
+	if x != nil {
+		return x.PlayerId
+	}
+	return ""
+}
+
+func (x *RspBody) GetEnterRoomRsp() *EnterRoomRsp {
+	if x != nil {
+		return x.EnterRoomRsp
+	}
+	return nil
+}
+
+func (x *RspBody) GetLeaveRoomRsp() *LeaveRoomRsp {
+	if x != nil {
+		return x.LeaveRoomRsp
+	}
+	return nil
+}
+
+func (x *RspBody) GetRoomMessageRsp() *RoomMessageRsp {
+	if x != nil {
+		return x.RoomMessageRsp
+	}
+	return nil
+}
+
 type Server2ClientRsp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -279,12 +913,13 @@ type Server2ClientRsp struct {
 	Cmd  Client2ServerReqCmd `protobuf:"varint,2,opt,name=cmd,proto3,enum=Client2ServerReqCmd" json:"cmd,omitempty"`
 	Code int32               `protobuf:"varint,3,opt,name=code,proto3" json:"code,omitempty"`
 	Msg  string              `protobuf:"bytes,4,opt,name=msg,proto3" json:"msg,omitempty"`
+	Body *RspBody            `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
 }
 
 func (x *Server2ClientRsp) Reset() {
 	*x = Server2ClientRsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_base_base_proto_msgTypes[3]
+		mi := &file_base_base_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -297,7 +932,7 @@ func (x *Server2ClientRsp) String() string {
 func (*Server2ClientRsp) ProtoMessage() {}
 
 func (x *Server2ClientRsp) ProtoReflect() protoreflect.Message {
-	mi := &file_base_base_proto_msgTypes[3]
+	mi := &file_base_base_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -310,7 +945,7 @@ func (x *Server2ClientRsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server2ClientRsp.ProtoReflect.Descriptor instead.
 func (*Server2ClientRsp) Descriptor() ([]byte, []int) {
-	return file_base_base_proto_rawDescGZIP(), []int{3}
+	return file_base_base_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Server2ClientRsp) GetSeq() string {
@@ -341,6 +976,179 @@ func (x *Server2ClientRsp) GetMsg() string {
 	return ""
 }
 
+func (x *Server2ClientRsp) GetBody() *RspBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+// Broadcast
+type Frames struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Frames []*Frame `protobuf:"bytes,1,rep,name=frames,proto3" json:"frames,omitempty"`
+}
+
+func (x *Frames) Reset() {
+	*x = Frames{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Frames) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Frames) ProtoMessage() {}
+
+func (x *Frames) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Frames.ProtoReflect.Descriptor instead.
+func (*Frames) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *Frames) GetFrames() []*Frame {
+	if x != nil {
+		return x.Frames
+	}
+	return nil
+}
+
+type BstBody struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	FromPlayerId string  `protobuf:"bytes,1,opt,name=fromPlayerId,proto3" json:"fromPlayerId,omitempty"`
+	Frames       *Frames `protobuf:"bytes,2,opt,name=frames,proto3" json:"frames,omitempty"`
+}
+
+func (x *BstBody) Reset() {
+	*x = BstBody{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *BstBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BstBody) ProtoMessage() {}
+
+func (x *BstBody) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BstBody.ProtoReflect.Descriptor instead.
+func (*BstBody) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *BstBody) GetFromPlayerId() string {
+	if x != nil {
+		return x.FromPlayerId
+	}
+	return ""
+}
+
+func (x *BstBody) GetFrames() *Frames {
+	if x != nil {
+		return x.Frames
+	}
+	return nil
+}
+
+type Server2ClientBst struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Type Server2ClientBstType `protobuf:"varint,1,opt,name=type,proto3,enum=Server2ClientBstType" json:"type,omitempty"`
+	Seq  string               `protobuf:"bytes,2,opt,name=seq,proto3" json:"seq,omitempty"`
+	Body *BstBody             `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+}
+
+func (x *Server2ClientBst) Reset() {
+	*x = Server2ClientBst{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_base_base_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Server2ClientBst) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Server2ClientBst) ProtoMessage() {}
+
+func (x *Server2ClientBst) ProtoReflect() protoreflect.Message {
+	mi := &file_base_base_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Server2ClientBst.ProtoReflect.Descriptor instead.
+func (*Server2ClientBst) Descriptor() ([]byte, []int) {
+	return file_base_base_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *Server2ClientBst) GetType() Server2ClientBstType {
+	if x != nil {
+		return x.Type
+	}
+	return Server2ClientBstType_E_PUSH_TEST
+}
+
+func (x *Server2ClientBst) GetSeq() string {
+	if x != nil {
+		return x.Seq
+	}
+	return ""
+}
+
+func (x *Server2ClientBst) GetBody() *BstBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
 var File_base_base_proto protoreflect.FileDescriptor
 
 var file_base_base_proto_rawDesc = []byte{
@@ -348,30 +1156,122 @@ var file_base_base_proto_rawDesc = []byte{
 	0x6f, 0x22, 0x2c, 0x0a, 0x04, 0x54, 0x65, 0x73, 0x74, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x65, 0x71,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x65, 0x71, 0x12, 0x12, 0x0a, 0x04, 0x62,
 	0x6f, 0x64, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22,
-	0x1b, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x75, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x69, 0x64, 0x22, 0x4c, 0x0a, 0x10,
-	0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71,
-	0x12, 0x26, 0x0a, 0x03, 0x63, 0x6d, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e,
-	0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71,
-	0x43, 0x6d, 0x64, 0x52, 0x03, 0x63, 0x6d, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x65, 0x71, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x65, 0x71, 0x22, 0x72, 0x0a, 0x10, 0x53, 0x65,
-	0x72, 0x76, 0x65, 0x72, 0x32, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x73, 0x70, 0x12, 0x10,
-	0x0a, 0x03, 0x73, 0x65, 0x71, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x65, 0x71,
-	0x12, 0x26, 0x0a, 0x03, 0x63, 0x6d, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e,
-	0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71,
-	0x43, 0x6d, 0x64, 0x52, 0x03, 0x63, 0x6d, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x03,
-	0x6d, 0x73, 0x67, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x2a, 0x34,
-	0x0a, 0x07, 0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x12, 0x15, 0x0a, 0x11, 0x45, 0x5f, 0x4d,
-	0x53, 0x47, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x49, 0x4e, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x10, 0x00,
-	0x12, 0x12, 0x0a, 0x0e, 0x45, 0x5f, 0x4d, 0x53, 0x47, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x43, 0x48,
-	0x41, 0x54, 0x10, 0x01, 0x2a, 0x3e, 0x0a, 0x13, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x43, 0x6d, 0x64, 0x12, 0x11, 0x0a, 0x0d, 0x45,
-	0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x49, 0x4e, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x10, 0x00, 0x12, 0x14,
-	0x0a, 0x10, 0x45, 0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x48, 0x45, 0x41, 0x52, 0x54, 0x5f, 0x42, 0x45,
-	0x41, 0x54, 0x10, 0x0a, 0x42, 0x15, 0x5a, 0x13, 0x72, 0x69, 0x62, 0x69, 0x6e, 0x2d, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2f, 0x62, 0x61, 0x73, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x88, 0x02, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x72,
+	0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x6f, 0x6f,
+	0x6d, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x12,
+	0x31, 0x0a, 0x0c, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x45, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f,
+	0x6d, 0x52, 0x65, 0x71, 0x52, 0x0c, 0x65, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52,
+	0x65, 0x71, 0x12, 0x31, 0x0a, 0x0c, 0x6c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52,
+	0x65, 0x71, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65,
+	0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x52, 0x0c, 0x6c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f,
+	0x6f, 0x6d, 0x52, 0x65, 0x71, 0x12, 0x37, 0x0a, 0x0e, 0x72, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73,
+	0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e,
+	0x52, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x52, 0x0e,
+	0x72, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x12, 0x2a,
+	0x0a, 0x0c, 0x73, 0x65, 0x6e, 0x64, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x18, 0x06,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x06, 0x2e, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x52, 0x0c, 0x73, 0x65,
+	0x6e, 0x64, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x22, 0x34, 0x0a, 0x08, 0x50, 0x6f,
+	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0c, 0x0a, 0x01, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x02, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02, 0x52,
+	0x01, 0x79, 0x12, 0x0c, 0x0a, 0x01, 0x7a, 0x18, 0x03, 0x20, 0x01, 0x28, 0x02, 0x52, 0x01, 0x7a,
+	0x22, 0x4a, 0x0a, 0x05, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x49, 0x64, 0x12, 0x25, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f,
+	0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x0e, 0x0a, 0x0c,
+	0x45, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x22, 0x0e, 0x0a, 0x0c,
+	0x4c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x65, 0x71, 0x22, 0x34, 0x0a, 0x0e,
+	0x52, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x65, 0x71, 0x12, 0x22,
+	0x0a, 0x07, 0x6d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32,
+	0x08, 0x2e, 0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x52, 0x07, 0x6d, 0x73, 0x67, 0x54, 0x79,
+	0x70, 0x65, 0x22, 0x6a, 0x0a, 0x10, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x12, 0x26, 0x0a, 0x03, 0x63, 0x6d, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72,
+	0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x43, 0x6d, 0x64, 0x52, 0x03, 0x63, 0x6d, 0x64, 0x12, 0x10,
+	0x0a, 0x03, 0x73, 0x65, 0x71, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x65, 0x71,
+	0x12, 0x1c, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08,
+	0x2e, 0x52, 0x65, 0x71, 0x42, 0x6f, 0x64, 0x79, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x7a,
+	0x0a, 0x08, 0x52, 0x6f, 0x6f, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x6f,
+	0x6f, 0x6d, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x6f, 0x6f, 0x6d,
+	0x49, 0x64, 0x12, 0x26, 0x0a, 0x0e, 0x6d, 0x61, 0x78, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x43,
+	0x6f, 0x75, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0e, 0x6d, 0x61, 0x78, 0x50,
+	0x6c, 0x61, 0x79, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x2e, 0x0a, 0x12, 0x63, 0x75,
+	0x72, 0x72, 0x65, 0x6e, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x12, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x50,
+	0x6c, 0x61, 0x79, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x6e, 0x74, 0x22, 0x35, 0x0a, 0x0c, 0x45, 0x6e,
+	0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a, 0x08, 0x72, 0x6f,
+	0x6f, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x52,
+	0x6f, 0x6f, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x6e, 0x66,
+	0x6f, 0x22, 0x0e, 0x0a, 0x0c, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73,
+	0x70, 0x22, 0x34, 0x0a, 0x0e, 0x52, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x52, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x07, 0x6d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0e, 0x32, 0x08, 0x2e, 0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x52, 0x07,
+	0x6d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x22, 0xdc, 0x01, 0x0a, 0x07, 0x52, 0x73, 0x70, 0x42,
+	0x6f, 0x64, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x70,
+	0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70,
+	0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x12, 0x31, 0x0a, 0x0c, 0x65, 0x6e, 0x74, 0x65, 0x72,
+	0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e,
+	0x45, 0x6e, 0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x52, 0x0c, 0x65, 0x6e,
+	0x74, 0x65, 0x72, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x12, 0x31, 0x0a, 0x0c, 0x6c, 0x65,
+	0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x0d, 0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x52,
+	0x0c, 0x6c, 0x65, 0x61, 0x76, 0x65, 0x52, 0x6f, 0x6f, 0x6d, 0x52, 0x73, 0x70, 0x12, 0x37, 0x0a,
+	0x0e, 0x72, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x52, 0x73, 0x70, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x52, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x52, 0x73, 0x70, 0x52, 0x0e, 0x72, 0x6f, 0x6f, 0x6d, 0x4d, 0x65, 0x73, 0x73,
+	0x61, 0x67, 0x65, 0x52, 0x73, 0x70, 0x22, 0x90, 0x01, 0x0a, 0x10, 0x53, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x32, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x52, 0x73, 0x70, 0x12, 0x10, 0x0a, 0x03, 0x73,
+	0x65, 0x71, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x73, 0x65, 0x71, 0x12, 0x26, 0x0a,
+	0x03, 0x63, 0x6d, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x14, 0x2e, 0x43, 0x6c, 0x69,
+	0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x43, 0x6d, 0x64,
+	0x52, 0x03, 0x63, 0x6d, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x6d, 0x73, 0x67,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6d, 0x73, 0x67, 0x12, 0x1c, 0x0a, 0x04, 0x62,
+	0x6f, 0x64, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x52, 0x73, 0x70, 0x42,
+	0x6f, 0x64, 0x79, 0x52, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x22, 0x28, 0x0a, 0x06, 0x46, 0x72, 0x61,
+	0x6d, 0x65, 0x73, 0x12, 0x1e, 0x0a, 0x06, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x06, 0x2e, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x52, 0x06, 0x66, 0x72, 0x61,
+	0x6d, 0x65, 0x73, 0x22, 0x4e, 0x0a, 0x07, 0x42, 0x73, 0x74, 0x42, 0x6f, 0x64, 0x79, 0x12, 0x22,
+	0x0a, 0x0c, 0x66, 0x72, 0x6f, 0x6d, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x66, 0x72, 0x6f, 0x6d, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
+	0x49, 0x64, 0x12, 0x1f, 0x0a, 0x06, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x07, 0x2e, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x73, 0x52, 0x06, 0x66, 0x72, 0x61,
+	0x6d, 0x65, 0x73, 0x22, 0x6d, 0x0a, 0x10, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x32, 0x43, 0x6c,
+	0x69, 0x65, 0x6e, 0x74, 0x42, 0x73, 0x74, 0x12, 0x29, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x15, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x32, 0x43,
+	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x42, 0x73, 0x74, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79,
+	0x70, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x73, 0x65, 0x71, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x03, 0x73, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x04, 0x62, 0x6f, 0x64, 0x79, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x08, 0x2e, 0x42, 0x73, 0x74, 0x42, 0x6f, 0x64, 0x79, 0x52, 0x04, 0x62, 0x6f,
+	0x64, 0x79, 0x2a, 0x34, 0x0a, 0x07, 0x4d, 0x73, 0x67, 0x54, 0x79, 0x70, 0x65, 0x12, 0x15, 0x0a,
+	0x11, 0x45, 0x5f, 0x4d, 0x53, 0x47, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x49, 0x4e, 0x56, 0x41, 0x4c,
+	0x49, 0x44, 0x10, 0x00, 0x12, 0x12, 0x0a, 0x0e, 0x45, 0x5f, 0x4d, 0x53, 0x47, 0x54, 0x59, 0x50,
+	0x45, 0x5f, 0x43, 0x48, 0x41, 0x54, 0x10, 0x01, 0x2a, 0x9c, 0x01, 0x0a, 0x13, 0x43, 0x6c, 0x69,
+	0x65, 0x6e, 0x74, 0x32, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x52, 0x65, 0x71, 0x43, 0x6d, 0x64,
+	0x12, 0x11, 0x0a, 0x0d, 0x45, 0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x49, 0x4e, 0x56, 0x41, 0x4c, 0x49,
+	0x44, 0x10, 0x00, 0x12, 0x14, 0x0a, 0x10, 0x45, 0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x48, 0x45, 0x41,
+	0x52, 0x54, 0x5f, 0x42, 0x45, 0x41, 0x54, 0x10, 0x0a, 0x12, 0x15, 0x0a, 0x10, 0x45, 0x5f, 0x43,
+	0x4d, 0x44, 0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x45, 0x4e, 0x54, 0x45, 0x52, 0x10, 0xd0, 0x0f,
+	0x12, 0x15, 0x0a, 0x10, 0x45, 0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x4c,
+	0x45, 0x41, 0x56, 0x45, 0x10, 0xd1, 0x0f, 0x12, 0x17, 0x0a, 0x12, 0x45, 0x5f, 0x43, 0x4d, 0x44,
+	0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x4d, 0x45, 0x53, 0x53, 0x41, 0x47, 0x45, 0x10, 0xd2, 0x0f,
+	0x12, 0x15, 0x0a, 0x10, 0x45, 0x5f, 0x43, 0x4d, 0x44, 0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x46,
+	0x52, 0x41, 0x4d, 0x45, 0x10, 0xd3, 0x0f, 0x2a, 0xa4, 0x01, 0x0a, 0x14, 0x53, 0x65, 0x72, 0x76,
+	0x65, 0x72, 0x32, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x42, 0x73, 0x74, 0x54, 0x79, 0x70, 0x65,
+	0x12, 0x0f, 0x0a, 0x0b, 0x45, 0x5f, 0x50, 0x55, 0x53, 0x48, 0x5f, 0x54, 0x45, 0x53, 0x54, 0x10,
+	0x00, 0x12, 0x16, 0x0a, 0x11, 0x45, 0x5f, 0x50, 0x55, 0x53, 0x48, 0x5f, 0x52, 0x4f, 0x4f, 0x4d,
+	0x5f, 0x45, 0x4e, 0x54, 0x45, 0x52, 0x10, 0xc8, 0x01, 0x12, 0x16, 0x0a, 0x11, 0x45, 0x5f, 0x50,
+	0x55, 0x53, 0x48, 0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x4c, 0x45, 0x41, 0x56, 0x45, 0x10, 0xc9,
+	0x01, 0x12, 0x18, 0x0a, 0x13, 0x45, 0x5f, 0x50, 0x55, 0x53, 0x48, 0x5f, 0x52, 0x4f, 0x4f, 0x4d,
+	0x5f, 0x4d, 0x45, 0x53, 0x53, 0x41, 0x47, 0x45, 0x10, 0xca, 0x01, 0x12, 0x18, 0x0a, 0x13, 0x45,
+	0x5f, 0x50, 0x55, 0x53, 0x48, 0x5f, 0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x43, 0x4f, 0x4e, 0x4e, 0x45,
+	0x43, 0x54, 0x10, 0xcb, 0x01, 0x12, 0x17, 0x0a, 0x12, 0x45, 0x5f, 0x50, 0x55, 0x53, 0x48, 0x5f,
+	0x52, 0x4f, 0x4f, 0x4d, 0x5f, 0x46, 0x52, 0x41, 0x4d, 0x45, 0x53, 0x10, 0xcc, 0x01, 0x42, 0x15,
+	0x5a, 0x13, 0x72, 0x69, 0x62, 0x69, 0x6e, 0x2d, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c,
+	0x2f, 0x62, 0x61, 0x73, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -386,24 +1286,55 @@ func file_base_base_proto_rawDescGZIP() []byte {
 	return file_base_base_proto_rawDescData
 }
 
-var file_base_base_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_base_base_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_base_base_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_base_base_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_base_base_proto_goTypes = []interface{}{
-	(MsgType)(0),             // 0: MsgType
-	(Client2ServerReqCmd)(0), // 1: Client2ServerReqCmd
-	(*Test)(nil),             // 2: Test
-	(*ReqBody)(nil),          // 3: ReqBody
-	(*Client2ServerReq)(nil), // 4: Client2ServerReq
-	(*Server2ClientRsp)(nil), // 5: Server2ClientRsp
+	(MsgType)(0),              // 0: MsgType
+	(Client2ServerReqCmd)(0),  // 1: Client2ServerReqCmd
+	(Server2ClientBstType)(0), // 2: Server2ClientBstType
+	(*Test)(nil),              // 3: Test
+	(*ReqBody)(nil),           // 4: ReqBody
+	(*Position)(nil),          // 5: Position
+	(*Frame)(nil),             // 6: Frame
+	(*EnterRoomReq)(nil),      // 7: EnterRoomReq
+	(*LeaveRoomReq)(nil),      // 8: LeaveRoomReq
+	(*RoomMessageReq)(nil),    // 9: RoomMessageReq
+	(*Client2ServerReq)(nil),  // 10: Client2ServerReq
+	(*RoomInfo)(nil),          // 11: RoomInfo
+	(*EnterRoomRsp)(nil),      // 12: EnterRoomRsp
+	(*LeaveRoomRsp)(nil),      // 13: LeaveRoomRsp
+	(*RoomMessageRsp)(nil),    // 14: RoomMessageRsp
+	(*RspBody)(nil),           // 15: RspBody
+	(*Server2ClientRsp)(nil),  // 16: Server2ClientRsp
+	(*Frames)(nil),            // 17: Frames
+	(*BstBody)(nil),           // 18: BstBody
+	(*Server2ClientBst)(nil),  // 19: Server2ClientBst
 }
 var file_base_base_proto_depIdxs = []int32{
-	1, // 0: Client2ServerReq.cmd:type_name -> Client2ServerReqCmd
-	1, // 1: Server2ClientRsp.cmd:type_name -> Client2ServerReqCmd
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	7,  // 0: ReqBody.enterRoomReq:type_name -> EnterRoomReq
+	8,  // 1: ReqBody.leaveRoomReq:type_name -> LeaveRoomReq
+	9,  // 2: ReqBody.roomMessageReq:type_name -> RoomMessageReq
+	6,  // 3: ReqBody.sendframeReq:type_name -> Frame
+	5,  // 4: Frame.position:type_name -> Position
+	0,  // 5: RoomMessageReq.msgType:type_name -> MsgType
+	1,  // 6: Client2ServerReq.cmd:type_name -> Client2ServerReqCmd
+	4,  // 7: Client2ServerReq.body:type_name -> ReqBody
+	11, // 8: EnterRoomRsp.roomInfo:type_name -> RoomInfo
+	0,  // 9: RoomMessageRsp.msgType:type_name -> MsgType
+	12, // 10: RspBody.enterRoomRsp:type_name -> EnterRoomRsp
+	13, // 11: RspBody.leaveRoomRsp:type_name -> LeaveRoomRsp
+	14, // 12: RspBody.roomMessageRsp:type_name -> RoomMessageRsp
+	1,  // 13: Server2ClientRsp.cmd:type_name -> Client2ServerReqCmd
+	15, // 14: Server2ClientRsp.body:type_name -> RspBody
+	6,  // 15: Frames.frames:type_name -> Frame
+	17, // 16: BstBody.frames:type_name -> Frames
+	2,  // 17: Server2ClientBst.type:type_name -> Server2ClientBstType
+	18, // 18: Server2ClientBst.body:type_name -> BstBody
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_base_base_proto_init() }
@@ -437,7 +1368,7 @@ func file_base_base_proto_init() {
 			}
 		}
 		file_base_base_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Client2ServerReq); i {
+			switch v := v.(*Position); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -449,7 +1380,163 @@ func file_base_base_proto_init() {
 			}
 		}
 		file_base_base_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Frame); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*EnterRoomReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LeaveRoomReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoomMessageReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Client2ServerReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoomInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*EnterRoomRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LeaveRoomRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoomMessageRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RspBody); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Server2ClientRsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Frames); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BstBody); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_base_base_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Server2ClientBst); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -466,8 +1553,8 @@ func file_base_base_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_base_base_proto_rawDesc,
-			NumEnums:      2,
-			NumMessages:   4,
+			NumEnums:      3,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
