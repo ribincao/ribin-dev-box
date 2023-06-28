@@ -4,8 +4,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ribincao/ribin-dev-box/ribin-common/config"
 	"github.com/ribincao/ribin-dev-box/ribin-common/constant"
-	"github.com/ribincao/ribin-dev-box/ribin-common/models"
 
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ func getLevel(level string) zapcore.Level {
 
 var logger *zap.Logger
 
-func InitLogger(config *models.LogConfig) {
+func InitLogger(config *config.LogConfig) {
 	if config == nil {
 		return
 	}

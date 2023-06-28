@@ -3,3 +3,6 @@
 {"level_name":"[ERROR]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:17]","msg":"ErrorTest :","Env":"local"}
 {"level_name":"[WARN]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:18]","msg":"WarnTest :","Env":"local"}
 {"level_name":"[FATAL]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:19]","msg":"FatalTest :","Env":"local"}
+{"level_name":"[INFO]","time":"2023-06-28 14:44:26.065","caller_line":"[db/redis.go:32]","msg":"[Engine-Tool] Redis Client Initialized!"}
+{"level_name":"[INFO]","time":"2023-06-28 14:44:26.104","caller_line":"[test/redis_test.go:21]","msg":"TestSet","value":"OK","err":null}
+{"level_name":"[INFO]","time":"2023-06-28 14:44:26.106","caller_line":"[test/redis_test.go:23]","msg":"TestSet","value":"pong","err":null}
