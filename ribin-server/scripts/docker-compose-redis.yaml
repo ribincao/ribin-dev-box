@@ -1,0 +1,17 @@
+version: '3'
+services:
+  redis:
+    image: redis:4.0.13
+    networks:
+      - engine_net
+    container_name: "engine-redis"
+    restart: always
+    command: --appendonly yes
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
+
+networks:
+  engine_net:
+    driver: bridge

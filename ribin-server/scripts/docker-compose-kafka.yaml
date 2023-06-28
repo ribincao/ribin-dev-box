@@ -1,0 +1,37 @@
+version: "3"
+services:
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    networks:
+      - engine_net
+    container_name: "engine-zookeeper"
+    restart: always
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    image: 'bitnami/kafka:latest'
+    networks:
+      - engine_net
+    container_name: "engine-kafka"
+    user: root
+    restart: always
+    ports:
+      - '9092:9092'
+    volumes:
+      - "./data/kafka:/bitnami/kafka"                    #数据挂载可使用数据卷
+      #- /etc/kafka/config:/opt/bitnami/kafka/config  #配置文件挂载一般挂宿主机目录
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181      #kafka zk走自定义bridge网络，可以使用服务名或容器名
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CREATE_TOPICS=bud_engine_update_matches:1:1
+    depends_on:
+      - zookeeper
+
+networks:
+  engine_net:
+    driver: bridge

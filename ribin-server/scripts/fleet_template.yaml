@@ -1,0 +1,50 @@
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  annotations:
+    agones.dev/sdk-version: 1.25.0
+  name: { fleetName }
+  namespace: default
+spec:
+  replicas: 4
+  scheduling: Packed
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      health: {}
+      ports:
+        - name: roomserver
+          portPolicy: Passthrough
+          protocol: TCP
+        - name: frameserver
+          portPolicy: Passthrough
+          protocol: TCP
+        - name: watchdog
+          portPolicy: Passthrough
+          protocol: TCP
+      sdkServer: {}
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          tolerations:
+            - key: "engine/karpenter"
+              operator: "Exists"
+              effect: "NoSchedule"
+          containers:
+            - image: game-server:{version}
+              imagePullPolicy: Always
+              name: engine-server-us
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 200Mi
+                requests:
+                  cpu: 100m
+                  memory: 200Mi
