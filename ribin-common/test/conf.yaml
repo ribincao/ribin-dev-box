@@ -1,0 +1,11 @@
+serviceConfig:
+  env: local
+  redisAddr: "127.0.0.1:6379"
+  redisUserName: ""
+  redisPasswd: ""
+logConfig:
+  logLevel: debug
+  logPath: server.log
+  logMode: combine
+  logMaxAge: 3
+  logMaxSize: 512

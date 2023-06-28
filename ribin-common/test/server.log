@@ -1,0 +1,5 @@
+{"level_name":"[DEBUG]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:15]","msg":"DebugTest :","Env":"local"}
+{"level_name":"[INFO]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:16]","msg":"InfoTest :","Env":"local"}
+{"level_name":"[ERROR]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:17]","msg":"ErrorTest :","Env":"local"}
+{"level_name":"[WARN]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:18]","msg":"WarnTest :","Env":"local"}
+{"level_name":"[FATAL]","time":"2023-06-28 14:21:21.926","caller_line":"[test/logger_test.go:19]","msg":"FatalTest :","Env":"local"}
