@@ -7,9 +7,13 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redsync/redsync/v4 v4.8.1
 	github.com/gorilla/websocket v1.4.2
+	github.com/matoous/go-nanoid v1.5.0
 	github.com/natefinch/lumberjack v2.0.0+incompatible
+	github.com/ribincao/ribin-dev-box/ribin-protocol v0.0.0-20230628081309-9dd30c1bf5d3
+	go.uber.org/atomic v1.7.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.53.0
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -24,12 +28,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/onsi/gomega v1.27.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20230301171018-9ab4bdc49ad5 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )

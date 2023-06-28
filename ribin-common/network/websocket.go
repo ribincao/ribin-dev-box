@@ -1,190 +1,115 @@
 package network
 
 import (
+	"net"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
-	errs "github.com/ribincao/ribin-dev-box/ribin-common/errors"
 	"github.com/ribincao/ribin-dev-box/ribin-common/logger"
-	"github.com/ribincao/ribin-dev-box/ribin-common/utils"
-	"go.uber.org/atomic"
 	"go.uber.org/zap"
 )
 
-const DefaultReadTimeout = 2 * time.Second
-const DefaultWriteTimeout = 2 * time.Second
-const DefaultWriteBuff = 1024
-
-type Message struct {
-	MsgType int
-	Data    []byte
+type Functor struct {
+	Func func(code int, text string, args ...interface{}) error
+	Args []interface{}
 }
 
-type ConnCallback interface {
-	OnConnect(*WrapConnection) bool
-	OnMessage(*WrapConnection, *Message) bool
-	OnClose(*WrapConnection)
+type WebSocketConn struct {
+	Mu                sync.Mutex
+	WebsocketConn     *websocket.Conn
+	onCloseFunctors   map[string]*Functor
+	onConnectFunctors map[string]*Functor
 }
 
-type WrapConnection struct {
-	Connection     *WebSocketConn
-	PlayerId       string
-	IsClosed       atomic.Bool
-	ReadTimeout    time.Duration
-	WriteTimeout   time.Duration
-	LastActiveTime *atomic.Int64
-	msgChan        chan *Message
-	server         ConnCallback
-	closeOnce      sync.Once
+func (c *WebSocketConn) ReadMessage() (messageType int, p []byte, err error) {
+	c.WebsocketConn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	return c.WebsocketConn.ReadMessage()
 }
 
-func (wc *WrapConnection) Read() (messageType int, p []byte, err error) {
-	if wc.IsClosed.Load() {
-		return 0, nil, errs.New(errs.ConnectionCloseErrorCode, "conn close error")
+func (c *WebSocketConn) WriteMessage(messageType int, data []byte) error {
+	c.Mu.Lock()
+	defer c.Mu.Unlock()
+	c.WebsocketConn.SetWriteDeadline(time.Now().Add(2 * time.Second))
+	return c.WebsocketConn.WriteMessage(messageType, data)
+}
+
+func (c *WebSocketConn) Close() {
+	c.WebsocketConn.Close()
+}
+
+func (c *WebSocketConn) RemoteAddr() net.Addr {
+	return c.WebsocketConn.RemoteAddr()
+}
+
+func (c *WebSocketConn) InitCloseHandler() {
+	c.WebsocketConn.SetCloseHandler(c.onClose)
+}
+
+func (c *WebSocketConn) onClose(code int, text string) error {
+	defaultCloseFunctor := func(code int, text string) error {
+		msg := websocket.FormatCloseMessage(code, "")
+		c.WebsocketConn.WriteControl(websocket.CloseMessage, msg, time.Now().Add(time.Second))
+		return nil
 	}
-	msgType, data, err := wc.Connection.ReadMessage()
-	if err != nil {
-		logger.Warn("ConnectionReadFailWarn",
-			zap.Any("Connection", wc),
-			zap.String("ErrMsg", err.Error()))
-		wc.Close()
-		return 0, nil, err
+
+	if c.onCloseFunctors == nil {
+		return defaultCloseFunctor(code, text)
 	}
-	wc.UpdateLastActiveTime(time.Now().UnixMilli())
 
-	return msgType, data, err
-}
-
-func (wc *WrapConnection) readInLoop() {
-	for {
-		if wc.IsClosed.Load() {
-			return
+	for funcName, functor := range c.onCloseFunctors {
+		if functor == nil {
+			continue
 		}
-		msgType, data, err := wc.Connection.ReadMessage()
+
+		err := functor.Func(code, text, functor.Args...)
 		if err != nil {
-			logger.Warn("ConnectionReadInLoopFailWarn",
-				zap.Any("Connection", wc),
-				zap.String("ErrMsg", err.Error()))
-			wc.Close()
-			return
-		}
-		packet := &Message{
-			MsgType: msgType,
-			Data:    data,
-		}
-
-		wc.UpdateLastActiveTime(time.Now().UnixMilli())
-		if !wc.server.OnMessage(wc, packet) {
-			wc.Close()
-			return
+			logger.Error("ConnectionOnCloseError",
+				zap.String("FunName", funcName),
+				zap.Int("Code", code),
+				zap.String("Text", text),
+				zap.Error(err))
 		}
 	}
+	return defaultCloseFunctor(code, text)
 }
 
-func (wc *WrapConnection) Write(messageType int, data []byte) (err error) {
-	if wc.IsClosed.Load() {
-		return errs.New(errs.ConnectionCloseErrorCode, "conn close error")
+func (c *WebSocketConn) RegisterCloseFunctor(name string, function *Functor) {
+	if c.onCloseFunctors == nil {
+		c.onCloseFunctors = make(map[string]*Functor)
 	}
-	packet := &Message{
-		MsgType: messageType,
-		Data:    data,
-	}
-	utils.GoWithRecover(func() {
-		err := wc.Connection.WriteMessage(packet.MsgType, packet.Data)
-		if err != nil {
-			logger.Warn("ConnectionWriteFailWarn",
-				zap.Any("Connection", wc),
-				zap.String("ErrMsg", err.Error()))
-			wc.Close()
-			return
-		}
-		wc.UpdateLastActiveTime(time.Now().UnixMilli())
-	})
-	return nil
-}
-func (wc *WrapConnection) writeInLoop() {
-	ticker := time.NewTicker(time.Second)
-	for {
-		select {
-		case packet := <-wc.msgChan:
-			if wc.IsClosed.Load() {
-				return
-			}
-			utils.GoWithRecover(func() {
-				err := wc.Connection.WriteMessage(packet.MsgType, packet.Data)
-				if err != nil {
-					logger.Warn("ConnectionWriteInLoopFailWarn",
-						zap.Any("Connection", wc),
-						zap.String("ErrMsg", err.Error()))
-					wc.Close()
-					return
-				}
-				wc.UpdateLastActiveTime(time.Now().UnixMilli())
-			})
-		case <-ticker.C:
-			if wc.IsClosed.Load() {
-				return
-			}
-		}
-	}
-}
-
-func (wc *WrapConnection) Close() {
-	wc.closeOnce.Do(func() {
-		wc.IsClosed.Store(true)
-		if wc.Connection != nil {
-			wc.Connection.Close()
-		}
-		close(wc.msgChan)
-		wc.server.OnClose(wc)
-	})
-}
-
-func (wc *WrapConnection) OnConnect() {
-	if wc.Connection != nil {
-		wc.Connection.onConnect()
-	}
-}
-
-func (wc *WrapConnection) AddOnConnectHandler(name string, function *Functor) {
-	wc.Connection.RegisterConnectFunctor(name, function)
-}
-
-func (wc *WrapConnection) AddOnCloseHandler(name string, function *Functor) {
-	wc.Connection.RegisterCloseFunctor(name, function)
-}
-
-func (wc *WrapConnection) UpdateLastActiveTime(timestamp int64) {
-	wc.LastActiveTime.Store(timestamp)
-}
-
-func (wc *WrapConnection) Run() {
-	if !wc.server.OnConnect(wc) {
+	if _, ok := c.onCloseFunctors[name]; ok {
+		logger.Warn("OnCloseFuntorName Already Exist", zap.String("Name", name))
 		return
 	}
-
-	utils.GoWithRecover(func() {
-		wc.readInLoop()
-	})
-	utils.GoWithRecover(func() {
-		wc.writeInLoop()
-	})
+	c.onCloseFunctors[name] = function
 }
 
-func NewWrapConn(conn *websocket.Conn, playerId string, server ConnCallback) *WrapConnection {
-	c := &WebSocketConn{
-		WebsocketConn: conn,
+func (c *WebSocketConn) onConnect() {
+	if c.onConnectFunctors == nil {
+		return
 	}
-	c.InitCloseHandler()
-	wc := &WrapConnection{
-		Connection:     c,
-		PlayerId:       playerId,
-		ReadTimeout:    DefaultReadTimeout,
-		WriteTimeout:   DefaultWriteTimeout,
-		LastActiveTime: atomic.NewInt64(time.Now().UnixMilli()),
-		msgChan:        make(chan *Message, DefaultWriteBuff),
-		server:         server,
+	for funcName, functor := range c.onConnectFunctors {
+		if functor == nil {
+			continue
+		}
+
+		err := functor.Func(0, "", functor.Args...)
+		if err != nil {
+			logger.Error("ConnectionOnConnectError",
+				zap.String("FunName", funcName),
+				zap.Error(err))
+		}
 	}
-	return wc
+}
+
+func (c *WebSocketConn) RegisterConnectFunctor(name string, function *Functor) {
+	if c.onConnectFunctors == nil {
+		c.onConnectFunctors = make(map[string]*Functor)
+	}
+	if _, ok := c.onConnectFunctors[name]; ok {
+		logger.Warn("OnConnectFuntorName Already Exist", zap.String("Name", name))
+		return
+	}
+	c.onConnectFunctors[name] = function
 }
