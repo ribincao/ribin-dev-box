@@ -174,7 +174,7 @@ func (tw *TimeWheel) RemoveTask(taskName string) error {
 	}
 
 	tw.tasks.Delete(taskName)
-	tw.remove(task)
+	tw.deleteTask(task)
 	return nil
 }
 
