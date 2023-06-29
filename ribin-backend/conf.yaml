@@ -1,0 +1,9 @@
+serviceConfig:
+  env: local
+  port: 8888
+logConfig:
+  logLevel: debug
+  logPath: server.log
+  logMode: combine
+  logMaxAge: 3
+  logMaxSize: 512

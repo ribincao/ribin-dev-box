@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/ribincao/ribin-dev-box/ribin-protocol/server-data;serverData";
+option go_package = "ribin-protocol/server-data";
 
 
 message Ping {
