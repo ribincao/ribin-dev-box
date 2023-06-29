@@ -1,5 +1,5 @@
 from common.singleton import Singleton
-from typing import Optional, Dict
+from typing import Optional
 
 
 class ServiceConfig:
@@ -24,7 +24,9 @@ class GlobalConfig(Singleton):
     def load_config(self, path: str = "./config.yaml"):
         from common.utils import data_util
 
-        data: Dict[str, Dict[str, str]] = data_util.load_from_yaml(path)
+        data = data_util.load_from_yaml(path)
+        if not data:
+            return
         for k, d in data.items():
             if k == "ServiceConfig":
                 if not self.service_config:
@@ -41,5 +43,7 @@ global_config = GlobalConfig()
 
 if __name__ == "__main__":
     global_config.load_config("../config.yaml")
-    print(global_config.service_config.openai_api)
-    print(global_config.log_config.log_path)
+    if global_config.service_config:
+        print(global_config.service_config.openai_api)
+    if global_config.log_config:
+        print(global_config.log_config.log_path)
