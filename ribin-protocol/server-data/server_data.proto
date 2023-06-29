@@ -1,0 +1,22 @@
+syntax = "proto3";
+option go_package = "github.com/ribincao/ribin-dev-box/ribin-protocol/server-data;serverData";
+
+
+message Ping {
+    int32 uid = 1;
+    string seq = 2;
+    int32 ts = 3;
+}
+
+message Pong {
+    int32 uid = 1;
+    string seq = 2;
+    int32 ts = 3;
+}
+
+service ServerData {
+  rpc HeartBeat(Ping) returns (Pong){}
+}
+
+// protoc --go_out=plugins=grpc:. --go_opt=paths=source_relative ./server-data/server_data.proto
+
