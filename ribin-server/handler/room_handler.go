@@ -28,6 +28,8 @@ func HandleServerMessage(ctx context.Context, conn *network.WrapConnection, req 
 		rspBody, err = handleEnterRoom(ctx, conn, req.Body, req.Seq)
 	case base.Client2ServerReqCmd_E_CMD_HEART_BEAT:
 		rspBody, err = handleHeartBeat(ctx, conn, req.Body, req.Seq)
+	case base.Client2ServerReqCmd_E_CMD_ROOM_FRAME:
+		handleRoomFrame(ctx, req.Body, req.Seq)
 	}
 
 	if err != nil {

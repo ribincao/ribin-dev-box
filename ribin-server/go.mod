@@ -9,6 +9,8 @@ require (
 	go.uber.org/zap v1.24.0
 )
 
+replace github.com/ribincao/ribin-dev-box/ribin-common => ../ribin-common
+
 require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/matoous/go-nanoid v1.5.0 // indirect
