@@ -5,6 +5,6 @@ ServiceConfig:
   redis_username: ""
   redis_password: ""
 LogConfig:
-  log_level: debug
+  log_level: DEBUG
   log_path: server.log
   log_mode: file
