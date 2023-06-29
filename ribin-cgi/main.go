@@ -31,7 +31,7 @@ func main() {
 		userGroup.GET("/testPost", handler.TestPost)
 	}
 
-	port := fmt.Sprintf(":%s", config.GlobalConfig.ServiceConfig.Port)
+	port := fmt.Sprintf(":%d", config.GlobalConfig.ServiceConfig.Port)
 	logger.Info("Cgi-Server Start Success", zap.Any("Port", port))
 	if err := engine.Run(port); err != nil {
 		panic(err)

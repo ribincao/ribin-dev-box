@@ -18,7 +18,7 @@ func init() {
 }
 
 func main() {
-	port := fmt.Sprintf(":%s", config.GlobalConfig.ServiceConfig.Port)
+	port := fmt.Sprintf(":%d", config.GlobalConfig.ServiceConfig.Port)
 	listen, err := net.Listen("tcp", port)
 	if err != nil {
 		panic(err)
