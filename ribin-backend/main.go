@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/ribincao/ribin-dev-box/ribin-backend/handler"
 	"github.com/ribincao/ribin-dev-box/ribin-common/config"
 	"github.com/ribincao/ribin-dev-box/ribin-common/logger"
 	serverData "github.com/ribincao/ribin-dev-box/ribin-protocol/server-data"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
@@ -16,7 +18,8 @@ func init() {
 }
 
 func main() {
-	listen, err := net.Listen("tcp", config.GlobalConfig.ServiceConfig.Port)
+	port := fmt.Sprintf(":%s", config.GlobalConfig.ServiceConfig.Port)
+	listen, err := net.Listen("tcp", port)
 	if err != nil {
 		panic(err)
 	}
@@ -24,6 +27,7 @@ func main() {
 	server := grpc.NewServer()
 	serverData.RegisterServerDataServer(server, &handler.EngineServer{})
 
+	logger.Info("Backend-Server Start Success", zap.Any("Port", port))
 	if err = server.Serve(listen); err != nil {
 		panic(err)
 	}

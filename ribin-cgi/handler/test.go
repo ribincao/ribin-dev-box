@@ -7,7 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/ribincao/ribin-dev-box/ribin-cgi/pool"
+	"github.com/ribincao/ribin-dev-box/ribin-common/logger"
 	serverData "github.com/ribincao/ribin-dev-box/ribin-protocol/server-data"
+	"go.uber.org/zap"
 )
 
 type TestData struct {
@@ -22,6 +24,7 @@ type TestResp struct {
 
 func TestGet(c *gin.Context) {
 	uid := c.Query("uid")
+	logger.Info("TestGet Req", zap.Any("Uid", uid))
 
 	segCtx := c.Request.Context()
 	ctx, cancel := context.WithTimeout(segCtx, time.Second*2)
@@ -34,6 +37,7 @@ func TestGet(c *gin.Context) {
 	}
 	client, err := pool.TryAtLeastOnce(ctx, pool.ServerDataPool)
 	if err != nil {
+		logger.Error("TestGetError -1", zap.Any("Uid", uid))
 		c.JSON(http.StatusInternalServerError, &TestResp{
 			RetCode: -1,
 			Rmsg:    "rpc error",
@@ -45,6 +49,7 @@ func TestGet(c *gin.Context) {
 	conn := serverData.NewServerDataClient(client)
 	pong, err := conn.HeartBeat(ctx, req)
 	if err != nil {
+		logger.Error("TestGetError -2", zap.Any("Uid", uid))
 		c.JSON(http.StatusInternalServerError, &TestResp{
 			RetCode: -2,
 			Rmsg:    "rpc error",
@@ -53,6 +58,7 @@ func TestGet(c *gin.Context) {
 		return
 	}
 
+	logger.Info("TestGet Rsp", zap.Any("Uid", uid))
 	c.JSON(http.StatusOK, &TestResp{
 		RetCode: 0,
 		Rmsg:    "",

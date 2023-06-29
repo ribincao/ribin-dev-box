@@ -1,15 +1,20 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/ribincao/ribin-dev-box/ribin-cgi/handler"
+	"github.com/ribincao/ribin-dev-box/ribin-cgi/pool"
 	"github.com/ribincao/ribin-dev-box/ribin-common/config"
 	"github.com/ribincao/ribin-dev-box/ribin-common/logger"
+	"go.uber.org/zap"
 )
 
 func init() {
 	config.InitConfig("./conf.yaml")
 	logger.InitLogger(config.GlobalConfig.LogConfig)
+	pool.InitRpcPool()
 }
 
 func main() {
@@ -24,5 +29,11 @@ func main() {
 	{
 		userGroup.GET("/testGet", handler.TestGet)
 		userGroup.GET("/testPost", handler.TestPost)
+	}
+
+	port := fmt.Sprintf(":%s", config.GlobalConfig.ServiceConfig.Port)
+	logger.Info("Cgi-Server Start Success", zap.Any("Port", port))
+	if err := engine.Run(port); err != nil {
+		panic(err)
 	}
 }
