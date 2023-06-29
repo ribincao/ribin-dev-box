@@ -61,6 +61,9 @@ github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsK
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/ribincao/ribin-dev-box/ribin-common v0.0.0-20230629030600-35711b17350f h1:TYFUhnfQbMLtpyReFOP6P0c5fM5IBmrc9hqMe18PihQ=
+github.com/ribincao/ribin-dev-box/ribin-common v0.0.0-20230629030600-35711b17350f/go.mod h1:LiBkw32uaskvG/qQlxYTNGXetR/oGkvZ0QEtBWZgsRw=
+github.com/ribincao/ribin-dev-box/ribin-protocol v0.0.0-20230629030600-35711b17350f/go.mod h1:vM5P9GI0dvbIDnSlsrv81CQpdubtnG0tNh+reyZ2a6Q=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
 github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=

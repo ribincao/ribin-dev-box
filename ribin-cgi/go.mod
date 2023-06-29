@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/ribincao/ribin-dev-box/ribin-common v0.0.0-20230629025938-885e856efe02
+	github.com/ribincao/ribin-dev-box/ribin-common v0.0.0-20230629030600-35711b17350f
 	github.com/ribincao/ribin-dev-box/ribin-protocol v0.0.0-20230629030600-35711b17350f
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.53.0
