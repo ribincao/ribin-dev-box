@@ -10,10 +10,6 @@ require (
 	google.golang.org/grpc v1.53.0
 )
 
-replace github.com/ribincao/ribin-dev-box/ribin-common => ../ribin-common
-
-replace github.com/ribincao/ribin-dev-box/ribin-protocol => ../ribin-protocol
-
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
