@@ -46,7 +46,7 @@ type LogConfig struct {
 
 type ServiceConfig struct {
 	Env           string `yaml:"env"`
-	Port          string `yaml:"port"`
+	Port          int32  `yaml:"port"`
 	RedisAddr     string `yaml:"redisAddr"`
 	RedisUserName string `yaml:"redisUserName"`
 	RedisPasswd   string `yaml:"redisPasswd"`
