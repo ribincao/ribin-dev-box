@@ -1,0 +1,11 @@
+{
+  "include": [
+    "common"
+  ],
+  "exclude": [
+    "**/__pycache__"
+  ],
+  "defineConstant": {
+    "DEBUG": true
+  }
+}
