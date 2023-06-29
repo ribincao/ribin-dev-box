@@ -31,17 +31,12 @@ type Client struct {
 	pool     *Pool
 }
 
-// Factor grpc连接工厂方法
 type Factor func() (*grpc.ClientConn, error)
 
 var (
-	// ErrPoolInit 连接池初始化出错
 	ErrPoolInit = errors.New("Pool init occurred error")
-	// ErrGetTimeout 获取连接超时
 	ErrGetTimeout = errors.New("Getting connection client timeout from pool")
-	// ErrDialConn 创建连接发生错误
 	ErrDialConn = errors.New("Dialing connection occurred error")
-	// ErrPoolIsClosed 连接池已关闭
 	ErrPoolIsClosed = errors.New("Pool is closed")
 )
 
@@ -61,16 +56,13 @@ func Default(factor Factor, init, cap int32) (*Pool, error) {
 	return Init(factor, init, cap, 10*time.Second, 60*time.Second, 10*time.Second, PoolGetModeLoose)
 }
 
-// Init 初始化连接池
 func Init(factor Factor, init, cap int32, idleDur, maxLifeDur, timeout time.Duration, mode int) (*Pool, error) {
-	// 参数验证
 	if factor == nil {
 		return nil, ErrPoolInit
 	}
 	if init < 0 || cap <= 0 || idleDur < 0 || maxLifeDur < 0 {
 		return nil, ErrPoolInit
 	}
-	// init pool
 	if init > cap {
 		init = cap
 	}
@@ -154,7 +146,6 @@ func (pool *Pool) Get(ctx context.Context) (*Client, error) {
 	return client, nil
 }
 
-// Close 连接池关闭
 func (pool *Pool) Close() {
 	pool.lock.Lock()
 	defer pool.lock.Unlock()

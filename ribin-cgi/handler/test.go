@@ -35,7 +35,7 @@ func TestGet(c *gin.Context) {
 		Seq: "test",
 		Ts:  time.Now().Unix(),
 	}
-	client, err := pool.TryAtLeastOnce(ctx, pool.ServerDataPool)
+	client, err := pool.GetRpcClient(ctx, pool.ServerDataPool)
 	if err != nil {
 		logger.Error("TestGetError -1", zap.Any("Uid", uid))
 		c.JSON(http.StatusInternalServerError, &TestResp{

@@ -28,15 +28,11 @@ func InitRpcPool() {
 	}
 }
 
-func TryAtLeastOnce(ctx context.Context, pool *grpcPool.Pool) (*grpcPool.Client, error) {
+func GetRpcClient(ctx context.Context, pool *grpcPool.Pool) (*grpcPool.Client, error) {
 	conn, err := pool.Get(ctx)
 	if err != nil {
 		logger.Error("grpc conn error", zap.Error(err))
-		conn, err = pool.Get(ctx)
-		if err != nil {
-			logger.Error("grpc conn error", zap.Error(err))
-			return nil, err
-		}
+		return nil, err
 	}
 	return conn, err
 }
