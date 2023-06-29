@@ -21,3 +21,7 @@
 go.work
 *.log
 /ribin-server/game-server
+
+
+**/__pycache__
+config.yaml
