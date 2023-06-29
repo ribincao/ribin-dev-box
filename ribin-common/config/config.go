@@ -50,6 +50,7 @@ type ServiceConfig struct {
 	RedisAddr     string `yaml:"redisAddr"`
 	RedisUserName string `yaml:"redisUserName"`
 	RedisPasswd   string `yaml:"redisPasswd"`
+	BackendAddr   string `yaml:"backendAddr"`
 }
 
 type AgonesConfig struct {
