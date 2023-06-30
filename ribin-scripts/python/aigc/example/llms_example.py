@@ -17,7 +17,7 @@ def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
         ret = llm.predict(
             "What would be a good company name for a company that makes colorful socks?"
         )
-        print(ret)
+        aprint(ret)
     return llm
 
 
@@ -35,7 +35,7 @@ def llms_chain_example() -> LLMChain:
     prompt = llms_prompt_example()
     chain = LLMChain(llm=llm, prompt=prompt)
     ret = chain.run("colorful socks")
-    print(ret)
+    aprint(ret)
     return chain
 
 
