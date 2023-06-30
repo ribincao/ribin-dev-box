@@ -1,16 +1,21 @@
-from common.config import get_opeai_api_key
+from common.config import get_opeai_api_key, get_serp_api_key
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.agents import AgentType, initialize_agent, load_tools
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
 from langchain import LLMChain
+import os
+
+os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
+os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
 
 
-def chat_model_example(is_test: bool = False) -> ChatOpenAI:
-    chat = ChatOpenAI(temperature=0, openai_api_key=get_opeai_api_key())  # type: ignore
+def chat_model_example(temperature: float = 0.0, is_test: bool = False) -> ChatOpenAI:
+    chat = ChatOpenAI(temperature=temperature)  # type: ignore
     if is_test:
         ret = chat.predict_messages(
             [
@@ -51,5 +56,19 @@ def chat_model_chain_example() -> LLMChain:
     return chain
 
 
+def chat_model_agent_example():
+    chat = chat_model_example(temperature=0.9)
+    from aigc.llms_server import llms_example
+
+    llm = llms_example()
+    tools = load_tools(["serpapi", "llm-math"], llm=llm)
+    agent = initialize_agent(
+        tools, chat, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+    )
+    agent.run(
+        "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
+    )
+
+
 if __name__ == "__main__":
-    chat_model_chain_example()
+    chat_model_agent_example()

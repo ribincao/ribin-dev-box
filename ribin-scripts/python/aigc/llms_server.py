@@ -1,11 +1,16 @@
-from common.config import get_opeai_api_key
-from langchain.llms import OpenAI
+from common.config import get_opeai_api_key, get_serp_api_key
+from langchain.agents import AgentType, initialize_agent, load_tools
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+from langchain.llms import OpenAI
+import os
+
+os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
+os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
 
 
-def llms_example(is_test: bool = False) -> OpenAI:
-    llm = OpenAI(openai_api_key=get_opeai_api_key(), temperature=0.9)  # type: ignore
+def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
+    llm = OpenAI(temperature=temperature)  # type: ignore
     if is_test:
         ret = llm.predict(
             "What would be a good company name for a company that makes colorful socks?"
@@ -32,5 +37,16 @@ def llms_chain_example() -> LLMChain:
     return chain
 
 
+def llms_agent_example():
+    llm = llms_example()
+    tools = load_tools(["serpapi", "llm-math"], llm=llm)
+    agent = initialize_agent(
+        tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+    )
+    agent.run(
+        "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
+    )
+
+
 if __name__ == "__main__":
-    llms_chain_example()
+    llms_agent_example()

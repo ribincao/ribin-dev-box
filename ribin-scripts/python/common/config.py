@@ -1,9 +1,11 @@
 from common.singleton import Singleton
 from typing import Optional
+import os
 
 
 class ServiceConfig:
     openai_api: str = ""
+    serp_api: str = ""
     env: str = ""
     redis_addr: str = ""
     redis_username: str = ""
@@ -46,6 +48,13 @@ def get_opeai_api_key() -> str:
     if not global_config.service_config:
         return ""
     return global_config.service_config.openai_api
+
+
+def get_serp_api_key() -> str:
+    global_config.load_config("./config.yaml")
+    if not global_config.service_config:
+        return ""
+    return global_config.service_config.serp_api
 
 
 if __name__ == "__main__":

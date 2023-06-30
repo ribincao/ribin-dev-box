@@ -1,5 +1,6 @@
 ServiceConfig:
   openai_api: xxx
+  serp_api: yyy
   env: local
   redis_addr: "127.0.0.1:6379"
   redis_username: ""
