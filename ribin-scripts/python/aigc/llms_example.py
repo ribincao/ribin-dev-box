@@ -1,9 +1,11 @@
 from common.config import get_opeai_api_key, get_serp_api_key
-from langchain.agents import AgentType, initialize_agent, load_tools
+from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.llms import OpenAI
+from langchain import ConversationChain
 import os
+from common.utils import aprint
 
 os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
 os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
@@ -37,7 +39,7 @@ def llms_chain_example() -> LLMChain:
     return chain
 
 
-def llms_agent_example():
+def llms_agent_example() -> AgentExecutor:
     llm = llms_example()
     tools = load_tools(["serpapi", "llm-math"], llm=llm)
     agent = initialize_agent(
@@ -46,7 +48,24 @@ def llms_agent_example():
     agent.run(
         "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
     )
+    return agent
+
+
+def llms_memory_example(is_test: bool = False) -> ConversationChain:
+    llm = llms_example()
+    conversion = ConversationChain(llm=llm, verbose=False)
+    if is_test:
+        aprint(conversion.run("Hi there!"))
+        aprint(conversion.run("I'm doing well! Just having a conversion with an AI."))
+        aprint(conversion.run("Bye!"))
+    return conversion
 
 
 if __name__ == "__main__":
-    llms_agent_example()
+    conversion = llms_memory_example()
+    while True:
+        text = input("Human: ")
+        if text == "q":
+            break
+        answer = conversion.run(text)
+        aprint("AI: " + answer)

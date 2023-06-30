@@ -1,5 +1,6 @@
 from common.singleton import Singleton
 from typing import Optional
+from rich.console import Console
 
 
 class DataUtil(Singleton):
@@ -24,3 +25,8 @@ class DataUtil(Singleton):
 
 
 data_util = DataUtil()
+console = Console()
+
+
+def aprint(msg: object, color: str = "green"):
+    console.log(f"[{color}] {msg}")

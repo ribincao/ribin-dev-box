@@ -1,14 +1,18 @@
 from common.config import get_opeai_api_key, get_serp_api_key
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.agents import AgentType, initialize_agent, load_tools
+from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
+    MessagesPlaceholder,
 )
 from langchain import LLMChain
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
 import os
+from common.utils import aprint
 
 os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
 os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
@@ -56,11 +60,11 @@ def chat_model_chain_example() -> LLMChain:
     return chain
 
 
-def chat_model_agent_example():
-    chat = chat_model_example(temperature=0.9)
-    from aigc.llms_server import llms_example
+def chat_model_agent_example() -> AgentExecutor:
+    from aigc.llms_example import llms_example
 
     llm = llms_example()
+    chat = chat_model_example(temperature=0.9)
     tools = load_tools(["serpapi", "llm-math"], llm=llm)
     agent = initialize_agent(
         tools, chat, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True
@@ -68,7 +72,43 @@ def chat_model_agent_example():
     agent.run(
         "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"
     )
+    return agent
+
+
+def chat_model_memory_example(is_test: bool = False) -> ConversationChain:
+    from aigc.llms_example import llms_example
+
+    llm = llms_example()
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template(
+                "The following is a friendly conversation between a human and an AI. The AI is talkative and "
+                "provides lots of specific details from its context. If the AI does not know the answer to a "
+                "question, it truthfully says it does not know."
+            ),
+            MessagesPlaceholder(variable_name="history"),
+            HumanMessagePromptTemplate.from_template("{input}"),
+        ]
+    )
+    memory = ConversationBufferMemory(return_messages=True)
+    conversion = ConversationChain(memory=memory, prompt=prompt, llm=llm)
+    if is_test:
+        aprint(conversion.predict(input="Hi there!"))
+        aprint(
+            conversion.predict(
+                input="I'm doing well! Just having a conversion with an AI."
+            )
+        )
+        aprint(conversion.predict(input="Bye!"))
+    return conversion
 
 
 if __name__ == "__main__":
-    chat_model_agent_example()
+    conversion = chat_model_memory_example()
+    while True:
+        text = input("Human: ")
+        if text == "q":
+            break
+        answer = conversion.predict(input=text)
+        answer = answer.split("\n")[-1]
+        aprint(answer)
