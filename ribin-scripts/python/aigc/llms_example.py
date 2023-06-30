@@ -58,14 +58,16 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
         aprint(conversion.run("Hi there!"))
         aprint(conversion.run("I'm doing well! Just having a conversion with an AI."))
         aprint(conversion.run("Bye!"))
+    else:
+        while True:
+            text = input("Human: ")
+            if not text or text == "q":
+                break
+            answer = conversion.run(text)
+            aprint("AI: " + answer)
+
     return conversion
 
 
 if __name__ == "__main__":
-    conversion = llms_memory_example()
-    while True:
-        text = input("Human: ")
-        if text == "q":
-            break
-        answer = conversion.run(text)
-        aprint("AI: " + answer)
+    llms_memory_example()

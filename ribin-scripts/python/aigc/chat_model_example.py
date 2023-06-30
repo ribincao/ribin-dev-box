@@ -100,15 +100,16 @@ def chat_model_memory_example(is_test: bool = False) -> ConversationChain:
             )
         )
         aprint(conversion.predict(input="Bye!"))
+    else:
+        while True:
+            text = input("Human: ")
+            if not text or text == "q":
+                break
+            answer = conversion.predict(input=text)
+            answer = answer.split("\n")[-1]
+            aprint(answer)
     return conversion
 
 
 if __name__ == "__main__":
-    conversion = chat_model_memory_example()
-    while True:
-        text = input("Human: ")
-        if text == "q":
-            break
-        answer = conversion.predict(input=text)
-        answer = answer.split("\n")[-1]
-        aprint(answer)
+    chat_model_memory_example()
