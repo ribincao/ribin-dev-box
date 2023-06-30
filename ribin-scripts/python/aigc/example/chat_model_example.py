@@ -61,7 +61,7 @@ def chat_model_chain_example() -> LLMChain:
 
 
 def chat_model_agent_example() -> AgentExecutor:
-    from aigc.llms_example import llms_example
+    from aigc.example.llms_example import llms_example
 
     llm = llms_example()
     chat = chat_model_example(temperature=0.9)
@@ -76,7 +76,7 @@ def chat_model_agent_example() -> AgentExecutor:
 
 
 def chat_model_memory_example(is_test: bool = False) -> ConversationChain:
-    from aigc.llms_example import llms_example
+    from aigc.example.llms_example import llms_example
 
     llm = llms_example()
     prompt = ChatPromptTemplate.from_messages(
