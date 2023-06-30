@@ -41,6 +41,13 @@ class GlobalConfig(Singleton):
 global_config = GlobalConfig()
 
 
+def get_opeai_api_key() -> str:
+    global_config.load_config("./config.yaml")
+    if not global_config.service_config:
+        return ""
+    return global_config.service_config.openai_api
+
+
 if __name__ == "__main__":
     global_config.load_config("../config.yaml")
     if global_config.service_config:

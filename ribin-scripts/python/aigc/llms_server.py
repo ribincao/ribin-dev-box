@@ -1,21 +1,36 @@
-from common.config import global_config
+from common.config import get_opeai_api_key
 from langchain.llms import OpenAI
-from typing import Optional
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
 
 
-def get_llm() -> Optional[OpenAI]:
-    if not global_config.service_config:
-        return None
-    if not global_config.service_config.openai_api:
-        return None
-    return OpenAI(openai_api_key=global_config.service_config.openai_api)  # type: ignore
-
-
-if __name__ == "__main__":
-    global_config.load_config("./config.yaml")
-    llm = get_llm()
-    if llm:
+def llms_example(is_test: bool = False) -> OpenAI:
+    llm = OpenAI(openai_api_key=get_opeai_api_key(), temperature=0.9)  # type: ignore
+    if is_test:
         ret = llm.predict(
             "What would be a good company name for a company that makes colorful socks?"
         )
         print(ret)
+    return llm
+
+
+def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
+    prompt = PromptTemplate.from_template(
+        "what is a good name for a company that makes {product}?"
+    )
+    if is_test:
+        prompt.format(product="colorful socks")
+    return prompt
+
+
+def llms_chain_example() -> LLMChain:
+    llm = llms_example()
+    prompt = llms_prompt_example()
+    chain = LLMChain(llm=llm, prompt=prompt)
+    ret = chain.run("colorful socks")
+    print(ret)
+    return chain
+
+
+if __name__ == "__main__":
+    llms_chain_example()
