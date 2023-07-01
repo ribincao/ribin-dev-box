@@ -1,4 +1,4 @@
-from common.config import get_opeai_api_key, get_serp_api_key
+from common.config import global_config
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SimpleSequentialChain
@@ -7,8 +7,9 @@ from langchain import ConversationChain
 import os
 from common.utils import aprint
 
-os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
-os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
+global_config.load_config()
+os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
+os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 
 def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:

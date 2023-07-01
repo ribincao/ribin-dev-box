@@ -1,11 +1,12 @@
-from common.config import get_opeai_api_key, get_serp_api_key
+from common.config import global_config
 from common.utils import aprint
 from langchain import OpenAI, ConversationChain, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 import os
 
-os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
-os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
+global_config.load_config()
+os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
+os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 chatgpt_template = """Assistant is a large language model trained by OpenAI.
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.

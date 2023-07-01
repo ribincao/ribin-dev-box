@@ -1,6 +1,4 @@
 ServiceConfig:
-  openai_api: xxx
-  serp_api: yyy
   env: local
   redis_addr: "127.0.0.1:6379"
   redis_username: ""
@@ -9,3 +7,6 @@ LogConfig:
   log_level: DEBUG
   log_path: server.log
   log_mode: file
+ApiKeys:
+  openai_api: xxx
+  serp_api: yyy

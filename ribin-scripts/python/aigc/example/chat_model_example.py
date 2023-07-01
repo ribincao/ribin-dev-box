@@ -1,4 +1,4 @@
-from common.config import get_opeai_api_key, get_serp_api_key
+from common.config import global_config
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
@@ -14,8 +14,9 @@ from langchain.memory import ConversationBufferMemory
 import os
 from common.utils import aprint
 
-os.environ["OPENAI_API_KEY"] = get_opeai_api_key()
-os.environ["SERPAPI_API_KEY"] = get_serp_api_key()
+global_config.load_config()
+os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
+os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 
 def chat_model_example(temperature: float = 0.0, is_test: bool = False) -> ChatOpenAI:

@@ -1,11 +1,12 @@
 from common.singleton import Singleton
-from typing import Optional
-import os
+
+
+class ApiKeys:
+    openai_api: str = ""
+    serp_api: str = ""
 
 
 class ServiceConfig:
-    openai_api: str = ""
-    serp_api: str = ""
     env: str = ""
     redis_addr: str = ""
     redis_username: str = ""
@@ -20,8 +21,9 @@ class LogConfig:
 
 class GlobalConfig(Singleton):
     def __init__(self):
-        self.service_config: Optional[ServiceConfig] = None
-        self.log_config: Optional[LogConfig] = None
+        self.service_config: ServiceConfig = ServiceConfig()
+        self.log_config: LogConfig = LogConfig()
+        self.api_keys: ApiKeys = ApiKeys()
 
     def load_config(self, path: str = "./config.yaml"):
         from common.utils import data_util
@@ -31,35 +33,17 @@ class GlobalConfig(Singleton):
             return
         for k, d in data.items():
             if k == "ServiceConfig":
-                if not self.service_config:
-                    self.service_config = ServiceConfig()
                 self.service_config.__dict__.update(d)
             elif k == "LogConfig":
-                if not self.log_config:
-                    self.log_config = LogConfig()
                 self.log_config.__dict__.update(d)
+            elif k == "ApiKeys":
+                self.api_keys.__dict__.update(d)
 
 
 global_config = GlobalConfig()
 
 
-def get_opeai_api_key() -> str:
-    global_config.load_config("./config.yaml")
-    if not global_config.service_config:
-        return ""
-    return global_config.service_config.openai_api
-
-
-def get_serp_api_key() -> str:
-    global_config.load_config("./config.yaml")
-    if not global_config.service_config:
-        return ""
-    return global_config.service_config.serp_api
-
-
 if __name__ == "__main__":
     global_config.load_config("../config.yaml")
-    if global_config.service_config:
-        print(global_config.service_config.openai_api)
-    if global_config.log_config:
-        print(global_config.log_config.log_path)
+    print(global_config.api_keys.openai_api)
+    print(global_config.log_config.log_path)
