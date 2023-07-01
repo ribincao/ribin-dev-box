@@ -10,6 +10,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms.loading import load_llm
 from langchain.chains import load_chain
 from langchain.prompts import load_prompt
+from langchain.callbacks import get_openai_callback
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -22,10 +23,12 @@ def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
             callbacks=[StreamingStdOutCallbackHandler()]
             )  # type: ignore
     if is_test:
-        ret = llm.predict(
-            "What would be a good company name for a company that makes colorful socks?"
-        )
-        aprint(ret)
+        with get_openai_callback() as call_back:
+            ret = llm.predict(
+                "What would be a good company name for a company that makes colorful socks?"
+            )
+            aprint(ret)
+            aprint(call_back)
     llm.save("./aigc/models/llm_example.json")
     return llm
 
@@ -101,7 +104,8 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
 
 
 if __name__ == "__main__":
+    llms_example(is_test=True)
     # llms_memory_example()
-    llms_prompt_example(True)
+    # llms_prompt_example(True)
     # llms_seq_chain_example()
     # llms_chain_example()
