@@ -1,17 +1,20 @@
 from common.config import global_config
+from typing import List
 from langchain.vectorstores import Chroma
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SimpleSequentialChain
 from langchain.llms import OpenAI
 from langchain import ConversationChain
-from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
+from langchain.embeddings import OpenAIEmbeddings
 from common.utils import aprint
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms.loading import load_llm
 from langchain.chains import load_chain
 from langchain.prompts import load_prompt
 from langchain.callbacks import get_openai_callback
+from langchain.schema import Document
+from langchain.chains import RetrievalQAWithSourcesChain
 import os
 
 global_config.load_config()
@@ -106,36 +109,48 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
     return conversion
 
 
-def llms_load_document_example():
-    from langchain.document_loaders import JSONLoader
-    from pprint import pprint
-    loader = JSONLoader(
-        file_path='./aigc/data/llm_example.json',
-        jq_schema='.messages[].content'
+def llms_load_document_example(file_path: str = "./aigc/data/llm_example.txt") -> List[Document]:
+    from langchain.document_loaders import TextLoader
+    loader = TextLoader(
+        file_path=file_path
     )
     data = loader.load()
-    aprint(data)
+    # aprint(data)
     return data
 
-def llms_split_example(document):
+def llms_split_example(document) -> List[Document]:
     from langchain.text_splitter import CharacterTextSplitter
     text_splitter = CharacterTextSplitter(
-        chunk_size=100, 
+        chunk_size=1000, 
         chunk_overlap=0
     )
     text = text_splitter.split_documents(document)
-    aprint(text)
+    # aprint(text)
+    return text
 
-def llms_embedding_example() -> SentenceTransformerEmbeddings:
-    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-    return embedding_function
+def llms_embedding_example() -> OpenAIEmbeddings:
+    embedding = OpenAIEmbeddings()  # type: ignore
+    return embedding
 
-def llms_chroma_example(docs, embedding):
-    db = Chroma.from_documents(docs, embedding, persist_directory="./aigc/chroma/llm_example")
-    # query = "What did the president say about Ketanji Brown Jackson"
-    # docs = db.similarity_search(query)
+def llms_chroma_example(docs: List[Document], embeddings: OpenAIEmbeddings) -> RetrievalQAWithSourcesChain:
+    db = Chroma.from_documents(
+            docs, 
+            embeddings, 
+            metadatas=[{"source": str(i)} for i in range(len(docs))],
+            persist_directory="./aigc/chroma/llm_example"
+            )
 
-
+    llm = llms_example()
+    retriever = db.as_retriever()
+    retriever.search_kwargs['distance_metric'] = 'cos'
+    retriever.search_kwargs['fetch_k'] = 100
+    retriever.search_kwargs['maximal_marginal_relevance'] = True
+    retriever.search_kwargs['k'] = 10
+    
+    chain = RetrievalQAWithSourcesChain.from_chain_type(llm, chain_type="stuff", retriever=retriever)
+    answer = chain({"question": "iphone14有什么颜色"}, return_only_outputs=True)
+    aprint(answer["answer"])
+    return chain  # type: ignore
 
 
 if __name__ == "__main__":
@@ -145,6 +160,6 @@ if __name__ == "__main__":
     # llms_seq_chain_example()
     # llms_chain_example()
     doc = llms_load_document_example()
-    data = llms_split_example(doc)
-    embedding = llms_embedding_example()
-    llms_chroma_example(data, embedding)
+    docs = llms_split_example(doc)
+    embeddings = llms_embedding_example()
+    llms_chroma_example(docs, embeddings)
