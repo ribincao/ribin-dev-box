@@ -39,7 +39,6 @@ def chatgpt(text, temperature: float = 0.0) -> LLMChain:
             break
         answer = chatgpt_chain.predict(human_input=text)
         aprint(answer)
-
     return chatgpt_chain
 
 

@@ -7,6 +7,9 @@ from langchain import ConversationChain
 import os
 from common.utils import aprint
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.llms.loading import load_llm
+from langchain.chains import load_chain
+from langchain.prompts import load_prompt
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -23,6 +26,7 @@ def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
             "What would be a good company name for a company that makes colorful socks?"
         )
         aprint(ret)
+    llm.save("./aigc/models/llm_example.json")
     return llm
 
 
@@ -31,6 +35,7 @@ def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
         "what is a good name for a company that makes {product}?"
     )
     if is_test:
+        prompt: PromptTemplate = load_prompt("./aigc/prompts/llm_example.json")  # type: ignore
         llm = llms_example()
         aprint(llm(prompt.format(product="colorful socks")))
     return prompt  
@@ -42,6 +47,7 @@ def llms_chain_example() -> LLMChain:
     chain = LLMChain(llm=llm, prompt=prompt)
     ret = chain.run("colorful socks")
     aprint(ret)
+    chain.save("./aigc/chains/llm_example.json")
     return chain
 
 def llms_seq_chain_example():
@@ -96,5 +102,6 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
 
 if __name__ == "__main__":
     # llms_memory_example()
-    # llms_prompt_example(True)
-    llms_seq_chain_example()
+    llms_prompt_example(True)
+    # llms_seq_chain_example()
+    # llms_chain_example()
