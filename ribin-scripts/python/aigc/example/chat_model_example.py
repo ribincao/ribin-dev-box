@@ -13,6 +13,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 import os
 from common.utils import aprint
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -20,7 +21,10 @@ os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 
 def chat_model_example(temperature: float = 0.0, is_test: bool = False) -> ChatOpenAI:
-    chat = ChatOpenAI(temperature=temperature)  # type: ignore
+    chat = ChatOpenAI(
+            temperature=temperature,
+            callbacks=[StreamingStdOutCallbackHandler()]
+            )  # type: ignore
     if is_test:
         ret = chat.predict_messages(
             [

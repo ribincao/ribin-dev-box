@@ -3,6 +3,7 @@ from common.utils import aprint
 from langchain import OpenAI, ConversationChain, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 import os
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -23,7 +24,10 @@ def chatgpt(text, temperature: float = 0.0) -> LLMChain:
         template=chatgpt_template
     )
     chatgpt_chain = LLMChain(
-        llm=OpenAI(temperature=temperature),  # type: ignore
+        llm=OpenAI(
+            temperature=temperature,
+            callbacks=[StreamingStdOutCallbackHandler()]
+            ),  # type: ignore
         prompt=prompt,
         verbose=False,
         memory=ConversationBufferWindowMemory(k=2),
@@ -49,6 +53,6 @@ def suanming_app():
     chatgpt(template, temperature=0.9)
 
 if __name__ == "__main__":
-    linux_shell()
-    # suanming_app()
+    # linux_shell()
+    suanming_app()
 

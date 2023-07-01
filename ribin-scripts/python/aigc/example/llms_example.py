@@ -6,6 +6,7 @@ from langchain.llms import OpenAI
 from langchain import ConversationChain
 import os
 from common.utils import aprint
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -13,7 +14,10 @@ os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 
 def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
-    llm = OpenAI(temperature=temperature)  # type: ignore
+    llm = OpenAI(
+            temperature=temperature,
+            callbacks=[StreamingStdOutCallbackHandler()]
+            )  # type: ignore
     if is_test:
         ret = llm.predict(
             "What would be a good company name for a company that makes colorful socks?"
@@ -27,10 +31,9 @@ def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
         "what is a good name for a company that makes {product}?"
     )
     if is_test:
-        prompt = prompt.format(product="colorful socks")
         llm = llms_example()
-        aprint(llm(prompt))
-    return prompt
+        aprint(llm(prompt.format(product="colorful socks")))
+    return prompt  
 
 
 def llms_chain_example() -> LLMChain:
