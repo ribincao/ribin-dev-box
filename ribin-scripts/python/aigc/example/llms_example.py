@@ -1,7 +1,7 @@
 from common.config import get_opeai_api_key, get_serp_api_key
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains import LLMChain, SimpleSequentialChain
 from langchain.llms import OpenAI
 from langchain import ConversationChain
 import os
@@ -26,7 +26,9 @@ def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
         "what is a good name for a company that makes {product}?"
     )
     if is_test:
-        prompt.format(product="colorful socks")
+        prompt = prompt.format(product="colorful socks")
+        llm = llms_example()
+        aprint(llm(prompt))
     return prompt
 
 
@@ -37,6 +39,25 @@ def llms_chain_example() -> LLMChain:
     ret = chain.run("colorful socks")
     aprint(ret)
     return chain
+
+def llms_seq_chain_example():
+    llm = llms_example(temperature=0.9)
+    first_prompt = PromptTemplate(
+            template="我姓{last_name}, 生了个儿子，帮我的儿子起个名字",
+            input_variables=["last_name"]
+            )
+    first_chain = LLMChain(llm=llm, prompt=first_prompt)
+    second_prompt = PromptTemplate(
+            template="我的儿子名字叫{name}, 给他起个小名",
+            input_variables=["name"]
+            )
+    secone_chain = LLMChain(llm=llm, prompt=second_prompt)
+    chain = SimpleSequentialChain(chains=[first_chain, secone_chain], verbose=True)
+    while True:
+        last_name = input("我姓: ")
+        if not last_name:
+            break
+        chain.run(last_name)
 
 
 def llms_agent_example() -> AgentExecutor:
@@ -70,4 +91,6 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
 
 
 if __name__ == "__main__":
-    llms_memory_example()
+    # llms_memory_example()
+    # llms_prompt_example(True)
+    llms_seq_chain_example()
