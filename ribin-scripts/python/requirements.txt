@@ -1,3 +1,7 @@
 openai
 langchain
 google-search-results
+sentence_transformers
+chromadb
+jq
+tiktoken

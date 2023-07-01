@@ -4,6 +4,7 @@ from common.singleton import Singleton
 class ApiKeys:
     openai_api: str = ""
     serp_api: str = ""
+    active_loop_api: str = ""
 
 
 class ServiceConfig:

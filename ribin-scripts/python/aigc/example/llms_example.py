@@ -1,20 +1,23 @@
 from common.config import global_config
+from langchain.vectorstores import Chroma
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SimpleSequentialChain
 from langchain.llms import OpenAI
 from langchain import ConversationChain
-import os
+from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from common.utils import aprint
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms.loading import load_llm
 from langchain.chains import load_chain
 from langchain.prompts import load_prompt
 from langchain.callbacks import get_openai_callback
+import os
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
 os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
+os.environ['ACTIVELOOP_TOKEN'] = global_config.api_keys.active_loop_api
 
 
 def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
@@ -103,9 +106,45 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
     return conversion
 
 
+def llms_load_document_example():
+    from langchain.document_loaders import JSONLoader
+    from pprint import pprint
+    loader = JSONLoader(
+        file_path='./aigc/data/llm_example.json',
+        jq_schema='.messages[].content'
+    )
+    data = loader.load()
+    aprint(data)
+    return data
+
+def llms_split_example(document):
+    from langchain.text_splitter import CharacterTextSplitter
+    text_splitter = CharacterTextSplitter(
+        chunk_size=100, 
+        chunk_overlap=0
+    )
+    text = text_splitter.split_documents(document)
+    aprint(text)
+
+def llms_embedding_example() -> SentenceTransformerEmbeddings:
+    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    return embedding_function
+
+def llms_chroma_example(docs, embedding):
+    db = Chroma.from_documents(docs, embedding, persist_directory="./aigc/chroma/llm_example")
+    # query = "What did the president say about Ketanji Brown Jackson"
+    # docs = db.similarity_search(query)
+
+
+
+
 if __name__ == "__main__":
-    llms_example(is_test=True)
+    # llms_example(is_test=True)
     # llms_memory_example()
     # llms_prompt_example(True)
     # llms_seq_chain_example()
     # llms_chain_example()
+    doc = llms_load_document_example()
+    data = llms_split_example(doc)
+    embedding = llms_embedding_example()
+    llms_chroma_example(data, embedding)

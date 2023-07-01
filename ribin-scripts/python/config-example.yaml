@@ -10,3 +10,4 @@ LogConfig:
 ApiKeys:
   openai_api: xxx
   serp_api: yyy
+  active_loop_api: zzz
