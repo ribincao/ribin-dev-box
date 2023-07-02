@@ -70,8 +70,8 @@ def llms_seq_chain_example():
             template="我的儿子名字叫{name}, 给他起个小名",
             input_variables=["name"]
             )
-    secone_chain = LLMChain(llm=llm, prompt=second_prompt)
-    chain = SimpleSequentialChain(chains=[first_chain, secone_chain], verbose=True)
+    second_chain = LLMChain(llm=llm, prompt=second_prompt)
+    chain = SimpleSequentialChain(chains=[first_chain, second_chain], verbose=True)
     while True:
         last_name = input("我姓: ")
         if not last_name:
