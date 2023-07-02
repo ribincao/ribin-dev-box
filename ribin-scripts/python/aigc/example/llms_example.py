@@ -12,7 +12,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms.loading import load_llm
 from langchain.chains import load_chain
 from langchain.prompts import load_prompt
-from langchain.callbacks import get_openai_callback
+from langchain.callbacks import get_openai_callback, tracing_enabled
 from langchain.schema import Document
 from langchain.chains import RetrievalQAWithSourcesChain
 import os
@@ -21,6 +21,7 @@ global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
 os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 os.environ['ACTIVELOOP_TOKEN'] = global_config.api_keys.active_loop_api
+os.environ["LANGCHAIN_TRACING"] = "true"
 
 
 def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
@@ -79,16 +80,25 @@ def llms_seq_chain_example():
         chain.run(last_name)
 
 
-def llms_agent_example() -> AgentExecutor:
+def llms_agent_example(is_test: bool = False) -> AgentExecutor:
     llm = llms_example()
     tools = load_tools(["serpapi", "llm-math"], llm=llm)
     agent = initialize_agent(
         tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
     )
-    agent.run(
-        "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
-    )
+    if not is_test:
+        agent.run(
+            "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
+        )
+        return agent
+
+    with tracing_enabled("ribin-dev") as session:
+        assert session
+        agent.run(
+            "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
+        )
     return agent
+
 
 
 def llms_memory_example(is_test: bool = False) -> ConversationChain:
@@ -156,10 +166,11 @@ def llms_chroma_example(docs: List[Document], embeddings: OpenAIEmbeddings) -> R
 if __name__ == "__main__":
     # llms_example(is_test=True)
     # llms_memory_example()
+    llms_agent_example(True)
     # llms_prompt_example(True)
     # llms_seq_chain_example()
     # llms_chain_example()
-    doc = llms_load_document_example()
-    docs = llms_split_example(doc)
-    embeddings = llms_embedding_example()
-    llms_chroma_example(docs, embeddings)
+    # doc = llms_load_document_example()
+    # docs = llms_split_example(doc)
+    # embeddings = llms_embedding_example()
+    # llms_chroma_example(docs, embeddings)
