@@ -1,5 +1,4 @@
 from common.config import global_config
-from common.logger import logger
 from common.utils import aprint
 from typing import List
 from langchain.chat_models import ChatOpenAI
@@ -13,7 +12,6 @@ from langchain.embeddings import OpenAIEmbeddings
 import os
 
 global_config.load_config()
-logger.init_logger(global_config.log_config)
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
 os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 os.environ["ACTIVELOOP_TOKEN"] = global_config.api_keys.active_loop_api
@@ -46,12 +44,14 @@ class CodeAssistant(object):
                     )
                     docs.extend(loader.load_and_split())
                 except Exception as error:
-                    logger.error(f"load code error {error}")
+                    aprint(f"[ERROR] load code error {error}")
+        aprint(f"step1. load code finished. {len(docs)}")
         return docs
 
     def split_documents(self, documents: List[Document]) -> List[Document]:
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.split_documents(documents)
+        aprint(f"step2. split code finished. {len(texts)}")
         return texts
 
     def get_embeddings(self) -> OpenAIEmbeddings:
@@ -66,6 +66,7 @@ class CodeAssistant(object):
         db = DeepLake.from_documents(
             documents=documents, embedding=embeddings, dataset_path=dataset_path
         )
+        aprint(f"step3. upload finished. {dataset_path}")
         return db
 
     def get_retriever(
@@ -94,20 +95,17 @@ class CodeAssistant(object):
 
     def run(self, code_root_path: str, dataset_path: str):
         docs = self.load_code(code_root_path)
-        logger.info(f"step1. load code finished. {len(docs)}")
         docs = self.split_documents(docs)
-        logger.info(f"step2. split code finished. {len(docs)}")
         embeddings = self.get_embeddings()
         self.upload(docs, embeddings, dataset_path)
-        logger.info(f"step3. upload finished. {dataset_path}")
 
         model = self.get_model()
         retriever = self.get_retriever(embeddings, dataset_path, is_filter=False)
         conversion = self.get_conversation(model, retriever)
-        logger.info(f"step4. get conversion finished.")
+        aprint(f"step4. get conversion finished.")
         chat_history = []
         while True:
-            question = input("Q: ")
+            question = input("Question: ")
             if not question:
                 break
             result = conversion(
@@ -115,11 +113,10 @@ class CodeAssistant(object):
                 return_only_outputs=True,
             )
             answer = result.get("answer", "ERROR")
-            logger.info(f"Question: {question}, Answer: {answer}")
+            aprint(f"Answer: {answer}")
 
 
 if __name__ == "__main__":
     code_path = "/Users/ribincao/Desktop/ribin-workspace/ribin-py-2dgame"
     code_ai = CodeAssistant()
     code_ai.run(code_path, DEEP_LAKE_DATASET_PATH)
-    pass
