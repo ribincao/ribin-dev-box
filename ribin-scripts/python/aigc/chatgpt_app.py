@@ -20,14 +20,12 @@ Assistant:"""
 
 def chatgpt(text, temperature: float = 0.0) -> LLMChain:
     prompt = PromptTemplate(
-        input_variables=["history", "human_input"], 
-        template=chatgpt_template
+        input_variables=["history", "human_input"], template=chatgpt_template
     )
     chatgpt_chain = LLMChain(
         llm=OpenAI(
-            temperature=temperature,
-            callbacks=[StreamingStdOutCallbackHandler()]
-            ),  # type: ignore
+            temperature=temperature, callbacks=[StreamingStdOutCallbackHandler()]
+        ),  # type: ignore
         prompt=prompt,
         verbose=False,
         memory=ConversationBufferWindowMemory(k=2),
@@ -51,7 +49,7 @@ def suanming_app():
     template = "你是一名精通八卦、占星和玄学的命理大师,我将称呼你大师,我会问你一些命理相关的问题,希望你基于自己的专业回答我"
     chatgpt(template, temperature=0.9)
 
+
 if __name__ == "__main__":
     # linux_shell()
     suanming_app()
-

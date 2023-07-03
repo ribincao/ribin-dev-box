@@ -20,15 +20,14 @@ import os
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
 os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
-os.environ['ACTIVELOOP_TOKEN'] = global_config.api_keys.active_loop_api
+os.environ["ACTIVELOOP_TOKEN"] = global_config.api_keys.active_loop_api
 os.environ["LANGCHAIN_TRACING"] = "true"
 
 
 def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
     llm = OpenAI(
-            temperature=temperature,
-            callbacks=[StreamingStdOutCallbackHandler()]
-            )  # type: ignore
+        temperature=temperature, callbacks=[StreamingStdOutCallbackHandler()]
+    )  # type: ignore
     if is_test:
         with get_openai_callback() as call_back:
             ret = llm.predict(
@@ -48,7 +47,7 @@ def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
         prompt: PromptTemplate = load_prompt("./aigc/prompts/llm_example.json")  # type: ignore
         llm = llms_example()
         aprint(llm(prompt.format(product="colorful socks")))
-    return prompt  
+    return prompt
 
 
 def llms_chain_example() -> LLMChain:
@@ -60,17 +59,16 @@ def llms_chain_example() -> LLMChain:
     chain.save("./aigc/chains/llm_example.json")
     return chain
 
+
 def llms_seq_chain_example():
     llm = llms_example(temperature=0.9)
     first_prompt = PromptTemplate(
-            template="我姓{last_name}, 生了个儿子，帮我的儿子起个名字",
-            input_variables=["last_name"]
-            )
+        template="我姓{last_name}, 生了个儿子，帮我的儿子起个名字", input_variables=["last_name"]
+    )
     first_chain = LLMChain(llm=llm, prompt=first_prompt)
     second_prompt = PromptTemplate(
-            template="我的儿子名字叫{name}, 给他起个小名",
-            input_variables=["name"]
-            )
+        template="我的儿子名字叫{name}, 给他起个小名", input_variables=["name"]
+    )
     second_chain = LLMChain(llm=llm, prompt=second_prompt)
     chain = SimpleSequentialChain(chains=[first_chain, second_chain], verbose=True)
     while True:
@@ -100,7 +98,6 @@ def llms_agent_example(is_test: bool = False) -> AgentExecutor:
     return agent
 
 
-
 def llms_memory_example(is_test: bool = False) -> ConversationChain:
     llm = llms_example()
     conversion = ConversationChain(llm=llm, verbose=False)
@@ -119,45 +116,51 @@ def llms_memory_example(is_test: bool = False) -> ConversationChain:
     return conversion
 
 
-def llms_load_document_example(file_path: str = "./aigc/data/llm_example.txt") -> List[Document]:
+def llms_load_document_example(
+    file_path: str = "./aigc/data/llm_example.txt",
+) -> List[Document]:
     from langchain.document_loaders import TextLoader
-    loader = TextLoader(
-        file_path=file_path
-    )
+
+    loader = TextLoader(file_path=file_path)
     data = loader.load()
     # aprint(data)
     return data
 
+
 def llms_split_example(document) -> List[Document]:
     from langchain.text_splitter import CharacterTextSplitter
-    text_splitter = CharacterTextSplitter(
-        chunk_size=1000, 
-        chunk_overlap=0
-    )
+
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     text = text_splitter.split_documents(document)
     # aprint(text)
     return text
+
 
 def llms_embedding_example() -> OpenAIEmbeddings:
     embedding = OpenAIEmbeddings()  # type: ignore
     return embedding
 
-def llms_chroma_example(docs: List[Document], embeddings: OpenAIEmbeddings) -> RetrievalQAWithSourcesChain:
+
+def llms_chroma_example(
+    docs: List[Document], embeddings: OpenAIEmbeddings
+) -> RetrievalQAWithSourcesChain:
     db = Chroma.from_documents(
-            docs, 
-            embeddings, 
-            metadatas=[{"source": str(i)} for i in range(len(docs))],
-            persist_directory="./aigc/chroma/llm_example"
-            )
+        docs,
+        embeddings,
+        metadatas=[{"source": str(i)} for i in range(len(docs))],
+        persist_directory="./aigc/chroma/llm_example",
+    )
 
     llm = llms_example()
     retriever = db.as_retriever()
-    retriever.search_kwargs['distance_metric'] = 'cos'
-    retriever.search_kwargs['fetch_k'] = 100
-    retriever.search_kwargs['maximal_marginal_relevance'] = True
-    retriever.search_kwargs['k'] = 10
-    
-    chain = RetrievalQAWithSourcesChain.from_chain_type(llm, chain_type="stuff", retriever=retriever)
+    retriever.search_kwargs["distance_metric"] = "cos"
+    retriever.search_kwargs["fetch_k"] = 100
+    retriever.search_kwargs["maximal_marginal_relevance"] = True
+    retriever.search_kwargs["k"] = 10
+
+    chain = RetrievalQAWithSourcesChain.from_chain_type(
+        llm, chain_type="stuff", retriever=retriever
+    )
     answer = chain({"question": "iphone14有什么颜色"}, return_only_outputs=True)
     aprint(answer["answer"])
     return chain  # type: ignore

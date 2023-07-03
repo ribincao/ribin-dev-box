@@ -22,9 +22,8 @@ os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 
 def chat_model_example(temperature: float = 0.0, is_test: bool = False) -> ChatOpenAI:
     chat = ChatOpenAI(
-            temperature=temperature,
-            callbacks=[StreamingStdOutCallbackHandler()]
-            )  # type: ignore
+        temperature=temperature, callbacks=[StreamingStdOutCallbackHandler()]
+    )  # type: ignore
     if is_test:
         ret = chat.predict_messages(
             [
