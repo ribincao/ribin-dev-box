@@ -6,6 +6,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 from langchain.chains import LLMChain
+from langchain.prompts.few_shot import FewShotPromptTemplate
 import os
 from common.utils import aprint
 from typing import List
@@ -64,18 +65,38 @@ class ChatSystem(object):
             v = input(f"Please enter value for system variable [{k}]: ")
             kwargs[k] = v
 
-        model = self.get_model()
+        model = self.get_model(temperature=0.9)
         conversation = self.get_coversation_chain(model, prompt)
         while True:
             for k in self.human_variables:
                 v = input(f"Please enter value for human variable [{k}]: ")
+                if not v:
+                    return
                 kwargs[k] = v
             answer = conversation.run(**kwargs)
+            answer = "".join(answer.split("\n\n"))
             aprint(f"{answer}")
 
 
-if __name__ == "__main__":
+def get_translator() -> ChatSystem:
     system_template = "You are a helpful assistant that translates {input_language} to {output_language}."
     human_template = "{text}"
     translater = ChatSystem(system_template, human_template)
-    translater.run()
+    return translater
+
+
+def get_zhihu() -> ChatSystem:
+    system_template = """
+    你是一个精通楚辞的诗人。
+    你回答问题的字数没有上限限制。
+    """
+    human_template = "{question}"
+    zhihu = ChatSystem(system_template, human_template)
+    return zhihu
+
+
+if __name__ == "__main__":
+    # translator = get_translator()
+    # translator.run()
+    zhihu = get_zhihu()
+    zhihu.run()
