@@ -1,0 +1,15 @@
+from typing import List
+
+
+class Solution:
+    def minCostClimbingStairs(self, cost: List[int]) -> int:
+        for i in range(2, len(cost)):
+            cost[i] += min(cost[i - 1], cost[i - 2])
+            print(cost)
+        return min(cost[-1], cost[-2])
+
+
+if __name__ == "__main__":
+    solution = Solution()
+    print(solution.minCostClimbingStairs([10, 15, 20]) == 15)
+    print(solution.minCostClimbingStairs([1, 100, 1, 1, 1, 100, 1, 1, 100, 1]) == 6)

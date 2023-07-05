@@ -1,21 +1,15 @@
-from common.config import global_config
 from typing import List
 from langchain.vectorstores import Chroma
 from langchain.agents import AgentType, initialize_agent, load_tools, AgentExecutor
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain, SimpleSequentialChain
 from langchain.llms import OpenAI
-from langchain import ConversationChain
 from langchain.embeddings import OpenAIEmbeddings
-from common.utils import aprint
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.llms.loading import load_llm
-from langchain.chains import load_chain
-from langchain.prompts import load_prompt
-from langchain.callbacks import get_openai_callback, tracing_enabled
+from langchain.callbacks import get_openai_callback
 from langchain.schema import Document
 from langchain.chains import RetrievalQAWithSourcesChain
 import os
+from common.config import global_config
 
 global_config.load_config()
 os.environ["OPENAI_API_KEY"] = global_config.api_keys.openai_api
@@ -23,29 +17,27 @@ os.environ["SERPAPI_API_KEY"] = global_config.api_keys.serp_api
 os.environ["ACTIVELOOP_TOKEN"] = global_config.api_keys.active_loop_api
 
 
-def llms_example(temperature: float = 0.0, is_test: bool = False) -> OpenAI:
-    llm = OpenAI(
-        temperature=temperature, callbacks=[StreamingStdOutCallbackHandler()]
-    )  # type: ignore
+def llms_example(temperature: float = 0.9, is_test: bool = False) -> OpenAI:
+    llm = OpenAI(temperature=temperature)  # type: ignore
     if is_test:
         with get_openai_callback() as call_back:
-            ret = llm.predict(
-                "What would be a good company name for a company that makes colorful socks?"
-            )
-            aprint(ret)
-            aprint(call_back)
-    llm.save("./aigc/models/llm_example.json")
+            ret = llm.predict("我姓曹，我的儿子起什么名字比较好?")
+            print(ret)
+            print()
+            print(call_back)
+    # llm.save("./aigc/models/llm_example.json")
     return llm
 
 
 def llms_prompt_example(is_test: bool = False) -> PromptTemplate:
-    prompt = PromptTemplate.from_template(
-        "what is a good name for a company that makes {product}?"
-    )
+    prompt = PromptTemplate.from_template("我姓{last_name},我的儿子起什么名字比较好?")
     if is_test:
-        prompt: PromptTemplate = load_prompt("./aigc/prompts/llm_example.json")  # type: ignore
-        llm = llms_example()
-        aprint(llm(prompt.format(product="colorful socks")))
+        with get_openai_callback() as call_back:
+            llm = llms_example()
+            message = prompt.format(last_name="曹")
+            print(llm.predict(message))
+            print()
+            print(call_back)
     return prompt
 
 
@@ -53,9 +45,9 @@ def llms_chain_example() -> LLMChain:
     llm = llms_example()
     prompt = llms_prompt_example()
     chain = LLMChain(llm=llm, prompt=prompt)
-    ret = chain.run("colorful socks")
-    aprint(ret)
-    chain.save("./aigc/chains/llm_example.json")
+    ret = chain.run("曹")
+    print(ret)
+    # chain.save("./aigc/chains/llm_example.json")
     return chain
 
 
@@ -77,47 +69,22 @@ def llms_seq_chain_example():
         chain.run(last_name)
 
 
-def llms_agent_example(is_test: bool = False) -> AgentExecutor:
-    os.environ["LANGCHAIN_TRACING"] = "true"
+def llms_agent_example() -> AgentExecutor:
     llm = llms_example()
     tools = load_tools(["serpapi", "llm-math"], llm=llm)
     agent = initialize_agent(
         tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
     )
-    if not is_test:
-        agent.run(
-            "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
-        )
-        return agent
-
-    with tracing_enabled("ribin-dev") as session:
-        assert session
-        agent.run(
-            "What was the high temperature in SF yesterday in Fahrenheit? What is that number rasied to the .023 power?"
-        )
+    while True:
+        question = input("Q: ")
+        if not question:
+            break
+        agent.run(question)
     return agent
 
 
-def llms_memory_example(is_test: bool = False) -> ConversationChain:
-    llm = llms_example()
-    conversion = ConversationChain(llm=llm, verbose=False)
-    if is_test:
-        aprint(conversion.run("Hi there!"))
-        aprint(conversion.run("I'm doing well! Just having a conversion with an AI."))
-        aprint(conversion.run("Bye!"))
-    else:
-        while True:
-            text = input("Human: ")
-            if not text or text == "q":
-                break
-            answer = conversion.run(text)
-            aprint("AI: " + answer)
-
-    return conversion
-
-
 def llms_load_document_example(
-    file_path: str = "./aigc/data/llm_example.txt",
+    file_path: str = "./aigc/data/llm_example2.txt",
 ) -> List[Document]:
     from langchain.document_loaders import TextLoader
 
@@ -134,19 +101,16 @@ def llms_split_example(document: List[Document]) -> List[Document]:
     return text
 
 
-def llms_embedding_example() -> OpenAIEmbeddings:
-    embedding = OpenAIEmbeddings()  # type: ignore
-    return embedding
+def llms_embedding_example() -> RetrievalQAWithSourcesChain:
+    docs = llms_load_document_example()
+    docs = llms_split_example(docs)
 
-
-def llms_chroma_example(
-    docs: List[Document], embeddings: OpenAIEmbeddings
-) -> RetrievalQAWithSourcesChain:
+    embeddings = OpenAIEmbeddings()  # type: ignore
     db = Chroma.from_documents(
         docs,
         embeddings,
         metadatas=[{"source": str(i)} for i in range(len(docs))],
-        persist_directory="./aigc/chroma/llm_example",
+        # persist_directory="./aigc/chroma/llm_example",
     )
 
     llm = llms_example()
@@ -164,19 +128,14 @@ def llms_chroma_example(
         if not question:
             break
         answer = chain({"question": question}, return_only_outputs=True)
-        aprint(answer["answer"])
+        print(answer["answer"])
     return chain  # type: ignore
 
 
 if __name__ == "__main__":
     # llms_example(is_test=True)
-    # llms_memory_example()
-    # llms_agent_example(True)
-    # llms_prompt_example(True)
-    # llms_seq_chain_example()
+    # llms_prompt_example(is_test=True)
     # llms_chain_example()
-    # doc = llms_load_document_example()
-    # docs = llms_split_example(doc)
-    # embeddings = llms_embedding_example()
-    # llms_chroma_example(docs, embeddings)
-    llms_example(is_test=True)
+    # llms_seq_chain_example()
+    # llms_agent_example()
+    llms_embedding_example()
