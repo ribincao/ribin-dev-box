@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"archive/zip"
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -69,4 +71,44 @@ func TestGet(c *gin.Context) {
 }
 
 func TestPost(c *gin.Context) {
+}
+
+type Person struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+	Age  uint   `json:"age"`
+}
+
+func handleDownloadResource(c *gin.Context) {
+	// 设置响应头
+	c.Header("Content-Type", "application/ictet-stream")
+	c.Header("Content-Disposition", "attachment;filename=resource.zip")
+
+	// 创建 ZIP 编写器
+	zipWriter := zip.NewWriter(c.Writer)
+	defer zipWriter.Close()
+
+	// 将每个人的数据写入单独的 JSON 文件，并添加到 ZIP 文件
+	var people []Person
+	people = append(people, Person{
+		ID:   1,
+		Name: "ribin",
+		Age:  28,
+	})
+	for _, person := range people {
+		// 创建 JSON 文件
+		jsonFileName := person.Name + ".json"
+		jsonFile, err := zipWriter.Create(jsonFileName)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Failed to create JSON file")
+			return
+		}
+
+		// 将数据写入 JSON 文件
+		encoder := json.NewEncoder(jsonFile)
+		if err := encoder.Encode(person); err != nil {
+			c.String(http.StatusInternalServerError, "Failed to write data to JSON file")
+			return
+		}
+	}
 }
