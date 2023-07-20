@@ -1,6 +1,6 @@
 serviceConfig:
   env: local
-  port: 8888
+  port: 9002
   backendAddr: 127.0.0.1:8889
 logConfig:
   logLevel: debug
