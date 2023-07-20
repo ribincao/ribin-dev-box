@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	config.InitConfig("./conf.yaml")
+	config.InitConfig("conf.yaml")
 	logger.InitLogger(config.GlobalConfig.LogConfig)
 }
 

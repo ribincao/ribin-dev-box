@@ -1,6 +1,6 @@
 serviceConfig:
   env: local
-  port: 8889
+  port: 9003
 logConfig:
   logLevel: debug
   logPath: server.log
